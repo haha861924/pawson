@@ -24,6 +24,7 @@ model Dog {
   feedPlans     FeedPlan[]
   healthRecords HealthRecord[]
   expenses      Expense[]
+  feedReviews   FeedReview[]
 }
 
 model CareRecord {
@@ -68,17 +69,18 @@ model FeedRecord {
 }
 
 model HealthRecord {
-  id          String    @id @default(cuid())
-  dogId       String
-  dog         Dog       @relation(fields: [dogId], references: [id], onDelete: Cascade)
-  date        DateTime  @default(now())
-  type        String
-  title       String
-  description String?
-  vetName     String?
-  nextDueDate DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id               String    @id @default(cuid())
+  dogId            String
+  dog              Dog       @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  date             DateTime  @default(now())
+  type             String
+  title            String
+  description      String?
+  vetName          String?
+  nextDueDate      DateTime?
+  reminderInterval String?   // "yearly", "6months", "3months", "monthly"
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   expenses Expense[]
 }
@@ -92,6 +94,7 @@ model Expense {
   amount         Float
   description    String
   notes          String?
+  invoiceNumber  String?       // Taiwan uniform invoice number (統一發票號碼)
   careRecordId   String?
   careRecord     CareRecord?   @relation(fields: [careRecordId], references: [id])
   feedRecordId   String?
@@ -100,4 +103,16 @@ model Expense {
   healthRecord   HealthRecord? @relation(fields: [healthRecordId], references: [id])
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+}
+
+model FeedReview {
+  id        String   @id @default(cuid())
+  dogId     String
+  dog       Dog      @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  foodName  String
+  brand     String?
+  rating    Int      // 1-5
+  review    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

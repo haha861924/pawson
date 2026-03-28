@@ -3,6 +3,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DogAvatar } from "./DogAvatar";
 import { differenceInYears, differenceInMonths } from "date-fns";
 import { DOG_SEX, getLabel } from "@/lib/types";
+import { buttonVariants } from "@/lib/button-variants";
+import { cn } from "@/lib/utils";
+import { Footprints, UtensilsCrossed, Heart, Wallet } from "lucide-react";
 
 interface DogCardProps {
   dog: {
@@ -14,6 +17,7 @@ interface DogCardProps {
     avatarUrl: string | null;
     _count: { careRecords: number; healthRecords: number; expenses: number };
   };
+  disableActions?: boolean;
 }
 
 function formatAge(dob: Date | null) {
@@ -24,11 +28,18 @@ function formatAge(dob: Date | null) {
   return `${months} 個月`;
 }
 
-export function DogCard({ dog }: DogCardProps) {
+const quickActions = [
+  { label: "散步", icon: Footprints, href: (id: string) => `/dogs/${id}/care/new` },
+  { label: "餵食", icon: UtensilsCrossed, href: (id: string) => `/dogs/${id}/feeding/new` },
+  { label: "健康", icon: Heart, href: (id: string) => `/dogs/${id}/health/new` },
+  { label: "花費", icon: Wallet, href: (id: string) => `/dogs/${id}/expenses/new` },
+];
+
+export function DogCard({ dog, disableActions = false }: DogCardProps) {
   return (
-    <Link href={`/dogs/${dog.id}`}>
-      <Card className="hover:shadow-md transition-shadow cursor-pointer">
-        <CardContent className="pt-6">
+    <Card className="hover:shadow-md transition-shadow">
+      <CardContent className="pt-6">
+        <Link href={disableActions ? "#" : `/dogs/${dog.id}`} className="block" tabIndex={disableActions ? -1 : undefined}>
           <div className="flex items-start gap-4">
             <DogAvatar name={dog.name} avatarUrl={dog.avatarUrl} size="lg" />
             <div className="flex-1 min-w-0">
@@ -58,8 +69,27 @@ export function DogCard({ dog }: DogCardProps) {
               <p className="text-muted-foreground text-xs">花費</p>
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </Link>
+        </Link>
+
+        {/* Quick action buttons */}
+        {!disableActions && (
+          <div className="mt-3 pt-3 border-t grid grid-cols-4 gap-1.5">
+            {quickActions.map(({ label, icon: Icon, href }) => (
+              <Link
+                key={label}
+                href={href(dog.id)}
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                  "flex flex-col gap-0.5 h-auto py-2 text-xs"
+                )}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+              </Link>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

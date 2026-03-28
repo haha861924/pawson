@@ -39,6 +39,14 @@ export const healthSchema = z.object({
   description: z.string().optional(),
   vetName: z.string().optional(),
   nextDueDate: z.string().optional(),
+  reminderInterval: z.string().optional(),
+});
+
+export const feedReviewSchema = z.object({
+  foodName: z.string().min(1, "請輸入飼料名稱"),
+  brand: z.string().optional(),
+  rating: z.coerce.number().int().min(1, "請選擇評分").max(5),
+  review: z.string().optional(),
 });
 
 export const expenseSchema = z.object({
@@ -48,4 +56,8 @@ export const expenseSchema = z.object({
   description: z.string().min(1, "請輸入說明"),
   date: z.string().min(1, "請選擇日期"),
   notes: z.string().optional(),
+  invoiceNumber: z.string().optional().refine(
+    (v) => !v || /^[A-Z]{2}\d{8}$/.test(v),
+    "格式應為兩個大寫英文字母加八位數字，例如：AB12345678"
+  ),
 });

@@ -6,6 +6,7 @@ import { deleteExpense } from "@/lib/actions/expenses";
 import { EXPENSE_CATEGORIES, getLabel } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { DogAvatar } from "@/components/dogs/DogAvatar";
+import { Receipt, ExternalLink } from "lucide-react";
 
 const categoryColor: Record<string, string> = {
   food: "bg-green-100 text-green-800",
@@ -25,7 +26,13 @@ interface Expense {
   description: string;
   date: Date;
   notes: string | null;
+  invoiceNumber: string | null;
   dog: { name: string; avatarUrl: string | null } | null;
+}
+
+// Taiwan uniform invoice lottery query URL
+function lotteryUrl(invoiceNumber: string) {
+  return `https://invoice.etax.nat.gov.tw/invoice.html#${invoiceNumber}`;
 }
 
 export function ExpenseList({
@@ -65,6 +72,24 @@ export function ExpenseList({
             </p>
             {expense.notes && (
               <p className="text-xs text-muted-foreground mt-0.5">{expense.notes}</p>
+            )}
+            {expense.invoiceNumber && (
+              <div className="flex items-center gap-1.5 mt-1">
+                <Receipt className="h-3 w-3 text-muted-foreground" />
+                <span className="text-xs font-mono text-muted-foreground">
+                  {expense.invoiceNumber}
+                </span>
+                <a
+                  href={lotteryUrl(expense.invoiceNumber)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-0.5 text-xs text-primary hover:underline"
+                  title="前往統一發票兌獎"
+                >
+                  對獎
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
             )}
           </div>
           <DeleteButton

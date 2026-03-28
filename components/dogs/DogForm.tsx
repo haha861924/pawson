@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/lib/button-variants";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ import {
 import { DOG_SEX } from "@/lib/types";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { Camera } from "lucide-react";
 
 type ActionResult = { error?: Record<string, string[]> } | void;
 
@@ -30,15 +32,83 @@ interface DogFormProps {
     weight?: number | null;
     sex?: string | null;
     notes?: string | null;
+    avatarUrl?: string | null;
   };
 }
 
 export function DogForm({ action, cancelHref, defaultValues }: DogFormProps) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const errors = (state as { error?: Record<string, string[]> })?.error ?? {};
+  const [preview, setPreview] = useState<string | null>(defaultValues?.avatarUrl ?? null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(defaultValues?.avatarUrl ?? null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadError(null);
+    setPreview(URL.createObjectURL(file));
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) {
+        setUploadError(data.error ?? "上傳失敗");
+        setPreview(defaultValues?.avatarUrl ?? null);
+      } else {
+        setAvatarUrl(data.url);
+      }
+    } catch {
+      setUploadError("上傳失敗，請稍後再試");
+      setPreview(defaultValues?.avatarUrl ?? null);
+    } finally {
+      setUploading(false);
+    }
+  }
 
   return (
     <form action={formAction} className="space-y-4 max-w-lg">
+      {/* Avatar upload */}
+      <div className="space-y-1">
+        <Label>大頭貼</Label>
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="relative h-20 w-20 rounded-full border-2 border-dashed border-muted-foreground/30 bg-muted hover:bg-muted/80 flex items-center justify-center overflow-hidden transition-colors"
+            disabled={uploading}
+          >
+            {preview ? (
+              <Image src={preview} alt="預覽" fill className="object-cover" sizes="80px" />
+            ) : (
+              <Camera className="h-6 w-6 text-muted-foreground" />
+            )}
+            {uploading && (
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                <span className="text-white text-xs">上傳中</span>
+              </div>
+            )}
+          </button>
+          <div className="text-sm text-muted-foreground">
+            <p>點擊上傳圖片</p>
+            <p className="text-xs">支援 JPG、PNG、WebP，最大 5MB</p>
+          </div>
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          className="hidden"
+          onChange={handleFileChange}
+        />
+        <input type="hidden" name="avatarUrl" value={avatarUrl ?? ""} />
+        {uploadError && <p className="text-destructive text-xs">{uploadError}</p>}
+      </div>
+
       <div className="space-y-1">
         <Label htmlFor="name">名字 *</Label>
         <Input id="name" name="name" defaultValue={defaultValues?.name} required />
@@ -100,7 +170,7 @@ export function DogForm({ action, cancelHref, defaultValues }: DogFormProps) {
       </div>
 
       <div className="flex gap-3 pt-2">
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" disabled={pending || uploading}>
           {pending ? "儲存中..." : "儲存"}
         </Button>
         <Link href={cancelHref} className={cn(buttonVariants({ variant: "outline" }))}>

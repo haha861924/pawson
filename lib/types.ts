@@ -40,6 +40,13 @@ export const EXPENSE_CATEGORIES = [
   { value: "other", label: "其他" },
 ] as const;
 
+export const REMINDER_INTERVALS = [
+  { value: "monthly", label: "每月", months: 1 },
+  { value: "3months", label: "每三個月", months: 3 },
+  { value: "6months", label: "每半年", months: 6 },
+  { value: "yearly", label: "每年", months: 12 },
+] as const;
+
 export const DOG_SEX = [
   { value: "male", label: "公" },
   { value: "female", label: "母" },

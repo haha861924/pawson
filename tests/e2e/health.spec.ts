@@ -32,7 +32,7 @@ test.describe("健康照護", () => {
   test("可以新增健康記錄（含下次日期）", async ({ page }) => {
     await page.goto(`/dogs/${dogId}/health/new`);
 
-    await page.locator("[data-slot=select-trigger]").click();
+    await page.locator("[data-slot=select-trigger]").first().click();
     await page.getByRole("option", { name: "疫苗" }).click();
 
     await page.getByLabel("標題 *").fill("狂犬病疫苗");
@@ -54,7 +54,7 @@ test.describe("健康照護", () => {
     // Add a record due in 7 days
     await page.goto(`/dogs/${dogId}/health/new`);
 
-    await page.locator("[data-slot=select-trigger]").click();
+    await page.locator("[data-slot=select-trigger]").first().click();
     await page.getByRole("option", { name: "驅蟲" }).click();
 
     await page.getByLabel("標題 *").fill("心絲蟲預防藥");

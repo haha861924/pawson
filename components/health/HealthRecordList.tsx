@@ -1,11 +1,13 @@
 "use client";
 
-import { format, isPast, isFuture, differenceInDays } from "date-fns";
+import { format, isPast, differenceInDays } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { HealthTypeBadge } from "./HealthTypeBadge";
 import { DeleteButton } from "@/components/shared/DeleteButton";
 import { deleteHealthRecord } from "@/lib/actions/health";
+import { REMINDER_INTERVALS, getLabel } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { Bell } from "lucide-react";
 
 interface HealthRecord {
   id: string;
@@ -15,6 +17,7 @@ interface HealthRecord {
   vetName: string | null;
   date: Date;
   nextDueDate: Date | null;
+  reminderInterval: string | null;
 }
 
 export function HealthRecordList({
@@ -46,6 +49,12 @@ export function HealthRecordList({
                 {record.description && (
                   <p className="text-sm mt-1 text-muted-foreground">{record.description}</p>
                 )}
+                {record.reminderInterval && record.reminderInterval !== "none" && (
+                  <p className="text-xs mt-1 text-muted-foreground flex items-center gap-1">
+                    <Bell className="h-3 w-3" />
+                    {getLabel(REMINDER_INTERVALS, record.reminderInterval)} 提醒
+                  </p>
+                )}
                 {nextDue && (
                   <p
                     className={cn(
@@ -54,7 +63,7 @@ export function HealthRecordList({
                     )}
                   >
                     下次：{format(nextDue, "yyyy/MM/dd")}
-                    {isOverdue && " (已過期)"}
+                    {isOverdue && " (已逾期)"}
                     {!isOverdue && daysUntil! <= 30 && ` (剩 ${daysUntil} 天)`}
                   </p>
                 )}

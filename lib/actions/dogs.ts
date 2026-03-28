@@ -30,6 +30,7 @@ export async function createDog(
     return { error: parsed.error.flatten().fieldErrors };
   }
   const { name, breed, dob, weight, sex, notes } = parsed.data;
+  const avatarUrl = (raw.avatarUrl as string) || null;
   const dog = await prisma.dog.create({
     data: {
       name,
@@ -38,6 +39,7 @@ export async function createDog(
       weight: weight ? Number(weight) : null,
       sex: sex || null,
       notes: notes || null,
+      avatarUrl,
     },
   });
   revalidatePath("/dogs");
@@ -55,6 +57,7 @@ export async function updateDog(
     return { error: parsed.error.flatten().fieldErrors };
   }
   const { name, breed, dob, weight, sex, notes } = parsed.data;
+  const avatarUrl = (raw.avatarUrl as string) || null;
   await prisma.dog.update({
     where: { id },
     data: {
@@ -64,20 +67,32 @@ export async function updateDog(
       weight: weight ? Number(weight) : null,
       sex: sex || null,
       notes: notes || null,
+      avatarUrl,
     },
   });
   revalidatePath(`/dogs/${id}`);
   redirect(`/dogs/${id}`);
 }
 
-export async function deleteDog(id: string) {
-  // SQLite doesn't enforce foreign keys by default, so manually cascade-delete
+async function _deleteDogById(id: string) {
   await prisma.expense.deleteMany({ where: { dogId: id } });
   await prisma.healthRecord.deleteMany({ where: { dogId: id } });
   await prisma.feedRecord.deleteMany({ where: { dogId: id } });
   await prisma.feedPlan.deleteMany({ where: { dogId: id } });
   await prisma.careRecord.deleteMany({ where: { dogId: id } });
+  await prisma.feedReview.deleteMany({ where: { dogId: id } });
   await prisma.dog.delete({ where: { id } });
+}
+
+export async function batchDeleteDogs(ids: string[]) {
+  for (const id of ids) {
+    await _deleteDogById(id);
+  }
+  revalidatePath("/dogs");
+}
+
+export async function deleteDog(id: string) {
+  await _deleteDogById(id);
   revalidatePath("/dogs");
   redirect("/dogs");
 }

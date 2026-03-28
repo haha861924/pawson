@@ -109,6 +109,24 @@ export function ExpenseForm({
       </div>
 
       <div className="space-y-1">
+        <Label htmlFor="invoiceNumber">統一發票號碼</Label>
+        <Input
+          id="invoiceNumber"
+          name="invoiceNumber"
+          placeholder="例：AB12345678"
+          maxLength={10}
+          style={{ textTransform: "uppercase" }}
+          onChange={(e) => {
+            e.target.value = e.target.value.toUpperCase();
+          }}
+        />
+        <p className="text-xs text-muted-foreground">填入後可於開獎時確認是否中獎</p>
+        {errors.invoiceNumber && (
+          <p className="text-destructive text-xs">{errors.invoiceNumber[0]}</p>
+        )}
+      </div>
+
+      <div className="space-y-1">
         <Label htmlFor="notes">備註</Label>
         <Textarea id="notes" name="notes" rows={2} />
       </div>

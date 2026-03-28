@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/lib/button-variants";
@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { HEALTH_TYPES } from "@/lib/types";
+import { HEALTH_TYPES, REMINDER_INTERVALS } from "@/lib/types";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +28,7 @@ interface HealthRecordFormProps {
 export function HealthRecordForm({ action, cancelHref }: HealthRecordFormProps) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const errors = (state as { error?: Record<string, string[]> })?.error ?? {};
+  const [reminderInterval, setReminderInterval] = useState("");
 
   return (
     <form action={formAction} className="space-y-4 max-w-lg">
@@ -71,9 +72,39 @@ export function HealthRecordForm({ action, cancelHref }: HealthRecordFormProps) 
       </div>
 
       <div className="space-y-1">
-        <Label htmlFor="nextDueDate">下次日期</Label>
-        <Input id="nextDueDate" name="nextDueDate" type="date" />
+        <Label htmlFor="reminderInterval">提醒週期</Label>
+        <Select
+          value={reminderInterval}
+          onValueChange={(v) => setReminderInterval(v ?? "")}
+        >
+          <SelectTrigger id="reminderInterval">
+            <SelectValue placeholder="選擇週期（自動計算下次日期）" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">不設定週期</SelectItem>
+            {REMINDER_INTERVALS.map((r) => (
+              <SelectItem key={r.value} value={r.value}>
+                {r.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <input
+          type="hidden"
+          name="reminderInterval"
+          value={reminderInterval === "none" ? "" : reminderInterval}
+        />
+        <p className="text-xs text-muted-foreground">
+          選擇週期後，系統將自動從記錄日期計算下次提醒日期
+        </p>
       </div>
+
+      {reminderInterval === "" || reminderInterval === "none" ? (
+        <div className="space-y-1">
+          <Label htmlFor="nextDueDate">下次日期（手動設定）</Label>
+          <Input id="nextDueDate" name="nextDueDate" type="date" />
+        </div>
+      ) : null}
 
       <div className="space-y-1">
         <Label htmlFor="description">說明</Label>

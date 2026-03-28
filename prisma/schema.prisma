@@ -1,13 +1,103 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
   provider = "sqlite"
+}
+
+model Dog {
+  id        String    @id @default(cuid())
+  name      String
+  breed     String?
+  dob       DateTime?
+  weight    Float?
+  sex       String?
+  notes     String?
+  avatarUrl String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  careRecords   CareRecord[]
+  feedRecords   FeedRecord[]
+  feedPlans     FeedPlan[]
+  healthRecords HealthRecord[]
+  expenses      Expense[]
+}
+
+model CareRecord {
+  id           String   @id @default(cuid())
+  dogId        String
+  dog          Dog      @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  date         DateTime @default(now())
+  type         String
+  durationMins Int?
+  notes        String?
+  createdAt    DateTime @default(now())
+
+  expenses Expense[]
+}
+
+model FeedPlan {
+  id          String   @id @default(cuid())
+  dogId       String
+  dog         Dog      @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  foodName    String
+  brand       String?
+  amountGrams Float
+  frequency   String
+  notes       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model FeedRecord {
+  id          String   @id @default(cuid())
+  dogId       String
+  dog         Dog      @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  date        DateTime @default(now())
+  foodName    String
+  amountGrams Float
+  mealTime    String?
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  expenses Expense[]
+}
+
+model HealthRecord {
+  id          String    @id @default(cuid())
+  dogId       String
+  dog         Dog       @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  date        DateTime  @default(now())
+  type        String
+  title       String
+  description String?
+  vetName     String?
+  nextDueDate DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  expenses Expense[]
+}
+
+model Expense {
+  id             String        @id @default(cuid())
+  dogId          String
+  dog            Dog           @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  date           DateTime      @default(now())
+  category       String
+  amount         Float
+  description    String
+  notes          String?
+  careRecordId   String?
+  careRecord     CareRecord?   @relation(fields: [careRecordId], references: [id])
+  feedRecordId   String?
+  feedRecord     FeedRecord?   @relation(fields: [feedRecordId], references: [id])
+  healthRecordId String?
+  healthRecord   HealthRecord? @relation(fields: [healthRecordId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 }

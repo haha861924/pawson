@@ -1,0 +1,23 @@
+import { createCareRecord } from "@/lib/actions/care";
+import { CareRecordForm } from "@/components/care/CareRecordForm";
+import { PageHeader } from "@/components/shared/PageHeader";
+
+export default async function NewCareRecordPage({
+  params,
+}: {
+  params: Promise<{ dogId: string }>;
+}) {
+  const { dogId } = await params;
+
+  async function action(_prev: unknown, formData: FormData) {
+    "use server";
+    return createCareRecord(dogId, _prev, formData);
+  }
+
+  return (
+    <div>
+      <PageHeader title="記錄照護" />
+      <CareRecordForm action={action} cancelHref={`/dogs/${dogId}/care`} />
+    </div>
+  );
+}

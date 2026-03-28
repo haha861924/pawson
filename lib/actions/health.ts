@@ -6,6 +6,7 @@ import { addMonths } from "date-fns";
 import { prisma } from "@/lib/prisma";
 import { healthSchema } from "@/lib/validations";
 import { REMINDER_INTERVALS } from "@/lib/types";
+import { getRequiredSession, assertCanEdit } from "@/lib/auth-utils";
 
 export async function getHealthRecordsByDog(dogId: string) {
   return prisma.healthRecord.findMany({
@@ -14,12 +15,13 @@ export async function getHealthRecordsByDog(dogId: string) {
   });
 }
 
-export async function getUpcomingHealthDue(days = 30) {
+export async function getUpcomingHealthDue(userId: string, days = 30) {
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() + days);
   return prisma.healthRecord.findMany({
     where: {
       nextDueDate: { lte: cutoff },
+      dog: { members: { some: { userId, canView: true } } },
     },
     include: { dog: true },
     orderBy: { nextDueDate: "asc" },
@@ -31,6 +33,8 @@ export async function createHealthRecord(
   _prev: unknown,
   formData: FormData
 ): Promise<{ error?: Record<string, string[]> } | void> {
+  const session = await getRequiredSession();
+  await assertCanEdit(session.user.id, dogId);
   const raw = Object.fromEntries(formData);
   const parsed = healthSchema.safeParse(raw);
   if (!parsed.success) {
@@ -66,6 +70,8 @@ export async function createHealthRecord(
 }
 
 export async function deleteHealthRecord(id: string, dogId: string) {
+  const session = await getRequiredSession();
+  await assertCanEdit(session.user.id, dogId);
   await prisma.healthRecord.delete({ where: { id } });
   revalidatePath(`/dogs/${dogId}/health`);
 }

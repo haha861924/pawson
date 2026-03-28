@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PawPrint, LayoutDashboard, DollarSign } from "lucide-react";
+import { PawPrint, LayoutDashboard, DollarSign, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { logoutUser } from "@/lib/actions/auth";
 
 const navItems = [
   { href: "/", label: "儀表板", icon: LayoutDashboard },
@@ -11,7 +12,7 @@ const navItems = [
   { href: "/expenses", label: "花費統計", icon: DollarSign },
 ];
 
-export function Sidebar() {
+export function Sidebar({ userName }: { userName?: string | null }) {
   const pathname = usePathname();
 
   return (
@@ -45,6 +46,20 @@ export function Sidebar() {
           );
         })}
       </nav>
+      <div className="p-3 border-t">
+        <div className="px-3 py-1.5 text-xs text-muted-foreground truncate mb-1">
+          {userName ?? "使用者"}
+        </div>
+        <form action={logoutUser}>
+          <button
+            type="submit"
+            className="flex items-center gap-3 px-3 py-2 w-full rounded-lg text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+          >
+            <LogOut className="h-4 w-4" />
+            登出
+          </button>
+        </form>
+      </div>
     </aside>
   );
 }

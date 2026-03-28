@@ -4,16 +4,25 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { dogSchema } from "@/lib/validations";
+import { getRequiredSession, assertCanEdit, assertOwner } from "@/lib/auth-utils";
 
 export async function getDogs() {
-  return prisma.dog.findMany({
-    orderBy: { createdAt: "desc" },
+  const session = await getRequiredSession();
+  const userId = session.user.id;
+  const memberships = await prisma.dogMember.findMany({
+    where: { userId, canView: true },
     include: {
-      _count: {
-        select: { careRecords: true, healthRecords: true, expenses: true },
+      dog: {
+        include: {
+          _count: {
+            select: { careRecords: true, healthRecords: true, expenses: true },
+          },
+        },
       },
     },
+    orderBy: { dog: { createdAt: "desc" } },
   });
+  return memberships.map((m) => ({ ...m.dog, role: m.role }));
 }
 
 export async function getDogById(id: string) {
@@ -24,6 +33,9 @@ export async function createDog(
   _prev: unknown,
   formData: FormData
 ): Promise<{ error?: Record<string, string[]> } | void> {
+  const session = await getRequiredSession();
+  const userId = session.user.id;
+
   const raw = Object.fromEntries(formData);
   const parsed = dogSchema.safeParse(raw);
   if (!parsed.success) {
@@ -40,6 +52,9 @@ export async function createDog(
       sex: sex || null,
       notes: notes || null,
       avatarUrl,
+      members: {
+        create: { userId, role: "OWNER", canView: true, canEdit: true },
+      },
     },
   });
   revalidatePath("/dogs");
@@ -51,6 +66,9 @@ export async function updateDog(
   _prev: unknown,
   formData: FormData
 ): Promise<{ error?: Record<string, string[]> } | void> {
+  const session = await getRequiredSession();
+  await assertCanEdit(session.user.id, id);
+
   const raw = Object.fromEntries(formData);
   const parsed = dogSchema.safeParse(raw);
   if (!parsed.success) {
@@ -85,13 +103,17 @@ async function _deleteDogById(id: string) {
 }
 
 export async function batchDeleteDogs(ids: string[]) {
+  const session = await getRequiredSession();
   for (const id of ids) {
+    await assertOwner(session.user.id, id);
     await _deleteDogById(id);
   }
   revalidatePath("/dogs");
 }
 
 export async function deleteDog(id: string) {
+  const session = await getRequiredSession();
+  await assertOwner(session.user.id, id);
   await _deleteDogById(id);
   revalidatePath("/dogs");
   redirect("/dogs");

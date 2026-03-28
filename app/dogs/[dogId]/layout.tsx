@@ -4,6 +4,8 @@ import { getDogById } from "@/lib/actions/dogs";
 import { DogAvatar } from "@/components/dogs/DogAvatar";
 import { differenceInYears, differenceInMonths } from "date-fns";
 import { DOG_SEX, getLabel } from "@/lib/types";
+import { getRequiredSession } from "@/lib/auth-utils";
+import { prisma } from "@/lib/prisma";
 
 const tabs = [
   { href: "", label: "總覽" },
@@ -29,8 +31,14 @@ export default async function DogLayout({
   params: Promise<{ dogId: string }>;
 }) {
   const { dogId } = await params;
-  const dog = await getDogById(dogId);
-  if (!dog) notFound();
+  const session = await getRequiredSession();
+  const [dog, member] = await Promise.all([
+    getDogById(dogId),
+    prisma.dogMember.findUnique({
+      where: { dogId_userId: { dogId, userId: session.user.id } },
+    }),
+  ]);
+  if (!dog || !member?.canView) notFound();
 
   return (
     <div>

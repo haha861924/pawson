@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { feedPlanSchema, feedRecordSchema } from "@/lib/validations";
+import { getRequiredSession, assertCanEdit } from "@/lib/auth-utils";
 
 export async function getActiveFeedPlan(dogId: string) {
   return prisma.feedPlan.findFirst({
@@ -24,6 +25,8 @@ export async function createFeedPlan(
   _prev: unknown,
   formData: FormData
 ): Promise<{ error?: Record<string, string[]> } | void> {
+  const session = await getRequiredSession();
+  await assertCanEdit(session.user.id, dogId);
   const raw = Object.fromEntries(formData);
   const parsed = feedPlanSchema.safeParse(raw);
   if (!parsed.success) {
@@ -52,6 +55,8 @@ export async function createFeedRecord(
   _prev: unknown,
   formData: FormData
 ): Promise<{ error?: Record<string, string[]> } | void> {
+  const session = await getRequiredSession();
+  await assertCanEdit(session.user.id, dogId);
   const raw = Object.fromEntries(formData);
   const parsed = feedRecordSchema.safeParse(raw);
   if (!parsed.success) {
@@ -73,6 +78,8 @@ export async function createFeedRecord(
 }
 
 export async function deleteFeedRecord(id: string, dogId: string) {
+  const session = await getRequiredSession();
+  await assertCanEdit(session.user.id, dogId);
   await prisma.feedRecord.delete({ where: { id } });
   revalidatePath(`/dogs/${dogId}/feeding`);
 }

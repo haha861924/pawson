@@ -1,5 +1,20 @@
 import { z } from "zod";
 
+export const registerSchema = z.object({
+  name: z.string().min(1, "請輸入名稱"),
+  email: z.string().email("請輸入有效電子郵件"),
+  password: z.string().min(8, "密碼至少 8 個字元"),
+});
+
+export const loginSchema = z.object({
+  email: z.string().email("請輸入有效電子郵件"),
+  password: z.string().min(1, "請輸入密碼"),
+});
+
+export const inviteMemberSchema = z.object({
+  email: z.string().email("請輸入有效電子郵件"),
+});
+
 export const dogSchema = z.object({
   name: z.string().min(1, "請輸入名字"),
   breed: z.string().optional(),

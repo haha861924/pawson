@@ -4,26 +4,31 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { expenseSchema } from "@/lib/validations";
+import { getRequiredSession, assertCanEdit } from "@/lib/auth-utils";
 
 export async function getExpenses(dogId?: string, breed?: string) {
+  const session = await getRequiredSession();
+  const userId = session.user.id;
   return prisma.expense.findMany({
-    where: dogId
-      ? { dogId }
-      : breed
-      ? { dog: { breed } }
-      : undefined,
+    where: {
+      dog: { members: { some: { userId, canView: true } } },
+      ...(dogId ? { dogId } : {}),
+      ...(breed ? { dog: { breed } } : {}),
+    },
     include: { dog: true },
     orderBy: { date: "desc" },
   });
 }
 
 export async function getExpenseSummary(dogId?: string, breed?: string) {
+  const session = await getRequiredSession();
+  const userId = session.user.id;
   const expenses = await prisma.expense.findMany({
-    where: dogId
-      ? { dogId }
-      : breed
-      ? { dog: { breed } }
-      : undefined,
+    where: {
+      dog: { members: { some: { userId, canView: true } } },
+      ...(dogId ? { dogId } : {}),
+      ...(breed ? { dog: { breed } } : {}),
+    },
     select: { amount: true, category: true, date: true },
   });
   const total = expenses.reduce((sum, e) => sum + e.amount, 0);
@@ -31,7 +36,6 @@ export async function getExpenseSummary(dogId?: string, breed?: string) {
     acc[e.category] = (acc[e.category] || 0) + e.amount;
     return acc;
   }, {});
-  // Monthly trend: last 6 months
   const byMonth = expenses.reduce<Record<string, number>>((acc, e) => {
     const key = `${new Date(e.date).getFullYear()}/${String(new Date(e.date).getMonth() + 1).padStart(2, "0")}`;
     acc[key] = (acc[key] || 0) + e.amount;
@@ -41,8 +45,10 @@ export async function getExpenseSummary(dogId?: string, breed?: string) {
 }
 
 export async function getBreeds() {
+  const session = await getRequiredSession();
+  const userId = session.user.id;
   const dogs = await prisma.dog.findMany({
-    where: { breed: { not: null } },
+    where: { breed: { not: null }, members: { some: { userId, canView: true } } },
     select: { breed: true },
     distinct: ["breed"],
     orderBy: { breed: "asc" },
@@ -54,12 +60,14 @@ export async function createExpense(
   _prev: unknown,
   formData: FormData
 ): Promise<{ error?: Record<string, string[]> } | void> {
+  const session = await getRequiredSession();
   const raw = Object.fromEntries(formData);
   const parsed = expenseSchema.safeParse(raw);
   if (!parsed.success) {
     return { error: parsed.error.flatten().fieldErrors };
   }
   const { dogId, category, amount, description, date, notes, invoiceNumber } = parsed.data;
+  await assertCanEdit(session.user.id, dogId);
   await prisma.expense.create({
     data: {
       dogId,
@@ -78,6 +86,8 @@ export async function createExpense(
 }
 
 export async function deleteExpense(id: string, dogId: string) {
+  const session = await getRequiredSession();
+  await assertCanEdit(session.user.id, dogId);
   await prisma.expense.delete({ where: { id } });
   revalidatePath(`/dogs/${dogId}/expenses`);
   revalidatePath("/expenses");

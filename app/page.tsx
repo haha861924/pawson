@@ -5,15 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/lib/button-variants";
 import { getDogs } from "@/lib/actions/dogs";
 import { getUpcomingHealthDue } from "@/lib/actions/health";
+import { getRequiredSession } from "@/lib/auth-utils";
 import { getExpenseSummary, getExpenses } from "@/lib/actions/expenses";
 import { HealthTypeBadge } from "@/components/health/HealthTypeBadge";
 
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
+  const session = await getRequiredSession();
   const [dogs, upcomingHealth, summary, recentExpenses] = await Promise.all([
     getDogs(),
-    getUpcomingHealthDue(30),
+    getUpcomingHealthDue(session.user.id, 30),
     getExpenseSummary(),
     getExpenses(),
   ]);

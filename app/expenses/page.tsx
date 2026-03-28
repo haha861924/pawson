@@ -32,7 +32,7 @@ export default async function AllExpensesPage({
 
   // Apply category filter client-side (after summary is computed from full set)
   const expenses = category
-    ? allExpenses.filter((e) => e.category === category)
+    ? allExpenses.filter((e: (typeof allExpenses)[number]) => e.category === category)
     : allExpenses;
 
   return (

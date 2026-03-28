@@ -105,7 +105,7 @@ export default async function DogOverviewPage({
           <p className="text-sm text-muted-foreground">尚無照護記錄</p>
         ) : (
           <div className="space-y-1">
-            {recentCare.slice(0, 3).map((c) => (
+            {recentCare.slice(0, 3).map((c: (typeof recentCare)[number]) => (
               <div key={c.id} className="flex items-center gap-2 text-sm">
                 <CareTypeBadge type={c.type} />
                 <span className="text-muted-foreground">{format(new Date(c.date), "MM/dd")}</span>
@@ -127,7 +127,7 @@ export default async function DogOverviewPage({
           <p className="text-sm text-muted-foreground">尚無健康記錄</p>
         ) : (
           <div className="space-y-1">
-            {recentHealth.slice(0, 3).map((h) => (
+            {recentHealth.slice(0, 3).map((h: (typeof recentHealth)[number]) => (
               <div key={h.id} className="flex items-center gap-2 text-sm">
                 <HealthTypeBadge type={h.type} />
                 <span>{h.title}</span>

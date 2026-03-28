@@ -63,7 +63,7 @@ export default async function DashboardPage() {
               <p className="text-sm text-muted-foreground text-center py-4">暫無待辦</p>
             ) : (
               <div className="space-y-2">
-                {upcomingHealth.slice(0, 5).map((h) => (
+                {upcomingHealth.slice(0, 5).map((h: (typeof upcomingHealth)[number]) => (
                   <Link
                     key={h.id}
                     href={`/dogs/${h.dogId}/health`}
@@ -97,7 +97,7 @@ export default async function DashboardPage() {
               <p className="text-sm text-muted-foreground text-center py-4">尚無花費記錄</p>
             ) : (
               <div className="space-y-2">
-                {recent.map((e) => (
+                {recent.map((e: (typeof recent)[number]) => (
                   <div key={e.id} className="flex justify-between text-sm">
                     <div className="flex-1 truncate">
                       <span className="text-muted-foreground">{e.dog.name} · </span>

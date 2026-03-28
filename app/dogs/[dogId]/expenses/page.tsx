@@ -22,7 +22,7 @@ export default async function DogExpensesPage({
   ]);
 
   const expenses = category
-    ? allExpenses.filter((e) => e.category === category)
+    ? allExpenses.filter((e: (typeof allExpenses)[number]) => e.category === category)
     : allExpenses;
 
   return (

@@ -3,6 +3,8 @@ import { DogListManager } from "@/components/dogs/DogListManager";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 
+export const dynamic = 'force-dynamic';
+
 export default async function DogsPage() {
   const dogs = await getDogs();
 

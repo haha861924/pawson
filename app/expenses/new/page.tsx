@@ -3,6 +3,8 @@ import { getDogs } from "@/lib/actions/dogs";
 import { ExpenseForm } from "@/components/expenses/ExpenseForm";
 import { PageHeader } from "@/components/shared/PageHeader";
 
+export const dynamic = 'force-dynamic';
+
 export default async function NewExpensePage() {
   const dogs = await getDogs();
 

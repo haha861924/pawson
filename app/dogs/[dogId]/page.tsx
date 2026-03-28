@@ -14,6 +14,8 @@ import { format } from "date-fns";
 import { FEED_FREQUENCIES, getLabel } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+export const dynamic = 'force-dynamic';
+
 export default async function DogOverviewPage({
   params,
 }: {

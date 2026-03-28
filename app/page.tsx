@@ -8,6 +8,8 @@ import { getUpcomingHealthDue } from "@/lib/actions/health";
 import { getExpenseSummary, getExpenses } from "@/lib/actions/expenses";
 import { HealthTypeBadge } from "@/components/health/HealthTypeBadge";
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage() {
   const [dogs, upcomingHealth, summary, recentExpenses] = await Promise.all([
     getDogs(),

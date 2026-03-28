@@ -2,6 +2,8 @@ import { createFeedRecord, getActiveFeedPlan } from "@/lib/actions/feeding";
 import { FeedRecordForm } from "@/components/feeding/FeedRecordForm";
 import { PageHeader } from "@/components/shared/PageHeader";
 
+export const dynamic = 'force-dynamic';
+
 export default async function NewFeedRecordPage({
   params,
 }: {

@@ -2,6 +2,8 @@ import { createCareRecord } from "@/lib/actions/care";
 import { CareRecordForm } from "@/components/care/CareRecordForm";
 import { PageHeader } from "@/components/shared/PageHeader";
 
+export const dynamic = 'force-dynamic';
+
 export default async function NewCareRecordPage({
   params,
 }: {

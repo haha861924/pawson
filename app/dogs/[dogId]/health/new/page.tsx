@@ -2,6 +2,8 @@ import { createHealthRecord } from "@/lib/actions/health";
 import { HealthRecordForm } from "@/components/health/HealthRecordForm";
 import { PageHeader } from "@/components/shared/PageHeader";
 
+export const dynamic = 'force-dynamic';
+
 export default async function NewHealthRecordPage({
   params,
 }: {

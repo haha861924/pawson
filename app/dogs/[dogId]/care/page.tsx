@@ -3,6 +3,8 @@ import { CareRecordList } from "@/components/care/CareRecordList";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 
+export const dynamic = 'force-dynamic';
+
 export default async function CarePage({
   params,
 }: {

@@ -3,6 +3,8 @@ import { HealthRecordList } from "@/components/health/HealthRecordList";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 
+export const dynamic = 'force-dynamic';
+
 export default async function HealthPage({
   params,
 }: {

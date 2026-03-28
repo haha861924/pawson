@@ -3,6 +3,8 @@ import { getDogById, updateDog } from "@/lib/actions/dogs";
 import { DogForm } from "@/components/dogs/DogForm";
 import { PageHeader } from "@/components/shared/PageHeader";
 
+export const dynamic = 'force-dynamic';
+
 export default async function EditDogPage({
   params,
 }: {

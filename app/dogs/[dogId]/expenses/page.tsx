@@ -5,6 +5,8 @@ import { ExpenseChart } from "@/components/expenses/ExpenseChart";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 
+export const dynamic = 'force-dynamic';
+
 export default async function DogExpensesPage({
   params,
   searchParams,

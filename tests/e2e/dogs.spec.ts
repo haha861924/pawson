@@ -35,6 +35,51 @@ test.describe("犬隻管理", () => {
     await expect(page).toHaveURL("/dogs");
   });
 
+  test("可以新增含晶片號碼的狗狗並在頁面顯示", async ({ page }) => {
+    await page.goto("/dogs/new");
+
+    const dogName = `晶片測試_${Date.now()}`;
+    await page.getByLabel("名字 *").fill(dogName);
+    await page.getByLabel("晶片號碼").fill("123456789012345");
+    await page.getByLabel("母犬晶片號碼").fill("987654321098765");
+
+    await page.getByRole("button", { name: "儲存" }).click();
+    await page.waitForURL(/\/dogs\/(?!new)[^/]+$/);
+
+    await expect(page.getByText("晶片：123456789012345")).toBeVisible();
+    await expect(page.getByText("母犬晶片：987654321098765")).toBeVisible();
+
+    // Cleanup
+    await page.getByRole("button", { name: "刪除", exact: false }).click();
+    await page.getByRole("button", { name: "刪除狗狗" }).click();
+    await expect(page).toHaveURL("/dogs");
+  });
+
+  test("可以從 layout 編輯狗狗資料", async ({ page }) => {
+    // Create a dog first
+    await page.goto("/dogs/new");
+    const dogName = `編輯測試_${Date.now()}`;
+    await page.getByLabel("名字 *").fill(dogName);
+    await page.getByRole("button", { name: "儲存" }).click();
+    await page.waitForURL(/\/dogs\/(?!new)[^/]+$/);
+
+    // Click pencil edit button in header
+    await page.getByRole("link", { name: "編輯" }).click();
+    await expect(page).toHaveURL(/\/dogs\/[^/]+\/edit$/);
+
+    const updatedName = `${dogName}_已編輯`;
+    await page.getByLabel("名字 *").fill(updatedName);
+    await page.getByRole("button", { name: "儲存" }).click();
+    await page.waitForURL(/\/dogs\/(?!new)[^/]+$/);
+
+    await expect(page.getByText(updatedName)).toBeVisible();
+
+    // Cleanup
+    await page.getByRole("button", { name: "刪除", exact: false }).click();
+    await page.getByRole("button", { name: "刪除狗狗" }).click();
+    await expect(page).toHaveURL("/dogs");
+  });
+
   test("名字為空時 HTML 驗證阻止提交", async ({ page }) => {
     await page.goto("/dogs/new");
     await page.getByRole("button", { name: "儲存" }).click();

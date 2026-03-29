@@ -33,7 +33,7 @@ export function CareRecordForm({ action, cancelHref }: CareRecordFormProps) {
     <form action={formAction} className="space-y-4 max-w-lg">
       <div className="space-y-1">
         <Label htmlFor="type">類型 *</Label>
-        <Select name="type" required>
+        <Select name="type" required items={Object.fromEntries(CARE_TYPES.map((t) => [t.value, t.label]))}>
           <SelectTrigger id="type">
             <SelectValue placeholder="選擇照護類型" />
           </SelectTrigger>

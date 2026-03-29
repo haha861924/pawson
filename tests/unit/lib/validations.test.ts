@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   dogSchema,
+  inviteMemberSchema,
   careSchema,
   feedPlanSchema,
   feedRecordSchema,
@@ -36,6 +37,42 @@ describe("dogSchema", () => {
   it("accepts empty string weight (optional)", () => {
     const result = dogSchema.safeParse({ name: "小白", weight: "" });
     expect(result.success).toBe(true);
+  });
+
+  it("accepts chipNumber and motherChipNumber", () => {
+    const result = dogSchema.safeParse({
+      name: "小白",
+      chipNumber: "123456789012345",
+      motherChipNumber: "987654321098765",
+    });
+    expect(result.success).toBe(true);
+    expect(result.data?.chipNumber).toBe("123456789012345");
+    expect(result.data?.motherChipNumber).toBe("987654321098765");
+  });
+
+  it("passes without chipNumber and motherChipNumber (optional)", () => {
+    const result = dogSchema.safeParse({ name: "小白" });
+    expect(result.success).toBe(true);
+    expect(result.data?.chipNumber).toBeUndefined();
+    expect(result.data?.motherChipNumber).toBeUndefined();
+  });
+});
+
+describe("inviteMemberSchema", () => {
+  it("passes with valid email", () => {
+    const result = inviteMemberSchema.safeParse({ email: "friend@example.com" });
+    expect(result.success).toBe(true);
+  });
+
+  it("fails with invalid email format", () => {
+    const result = inviteMemberSchema.safeParse({ email: "not-an-email" });
+    expect(result.success).toBe(false);
+    expect(result.error?.flatten().fieldErrors.email).toBeDefined();
+  });
+
+  it("fails with empty email", () => {
+    const result = inviteMemberSchema.safeParse({ email: "" });
+    expect(result.success).toBe(false);
   });
 });
 

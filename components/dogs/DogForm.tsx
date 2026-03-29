@@ -33,6 +33,8 @@ interface DogFormProps {
     sex?: string | null;
     notes?: string | null;
     avatarUrl?: string | null;
+    chipNumber?: string | null;
+    motherChipNumber?: string | null;
   };
 }
 
@@ -123,7 +125,7 @@ export function DogForm({ action, cancelHref, defaultValues }: DogFormProps) {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label htmlFor="sex">性別</Label>
-          <Select name="sex" defaultValue={defaultValues?.sex ?? ""}>
+          <Select name="sex" defaultValue={defaultValues?.sex ?? ""} items={Object.fromEntries(DOG_SEX.map((s) => [s.value, s.label]))}>
             <SelectTrigger id="sex">
               <SelectValue placeholder="選擇性別" />
             </SelectTrigger>
@@ -162,6 +164,17 @@ export function DogForm({ action, cancelHref, defaultValues }: DogFormProps) {
               : ""
           }
         />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <Label htmlFor="chipNumber">晶片號碼</Label>
+          <Input id="chipNumber" name="chipNumber" defaultValue={defaultValues?.chipNumber ?? ""} />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="motherChipNumber">母犬晶片號碼</Label>
+          <Input id="motherChipNumber" name="motherChipNumber" defaultValue={defaultValues?.motherChipNumber ?? ""} />
+        </div>
       </div>
 
       <div className="space-y-1">

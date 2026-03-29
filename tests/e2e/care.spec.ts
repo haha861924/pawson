@@ -4,23 +4,25 @@ test.describe("日常照護", () => {
   let dogId: string;
 
   test.beforeAll(async ({ browser }) => {
-    const page = await browser.newPage();
+    const ctx = await browser.newContext({ storageState: "tests/.auth/user.json" });
+    const page = await ctx.newPage();
     await page.goto("/dogs/new");
     await page.getByLabel("名字 *").fill(`照護測試_${Date.now()}`);
     await page.getByRole("button", { name: "儲存" }).click();
     await page.waitForURL(/\/dogs\/(?!new)[^/]+$/);
     dogId = page.url().split("/dogs/")[1];
-    await page.close();
+    await ctx.close();
   });
 
   test.afterAll(async ({ browser }) => {
     if (!dogId) return;
-    const page = await browser.newPage();
+    const ctx = await browser.newContext({ storageState: "tests/.auth/user.json" });
+    const page = await ctx.newPage();
     await page.goto(`/dogs/${dogId}`);
     await page.getByRole("button", { name: "刪除", exact: false }).click();
     await page.getByRole("button", { name: "刪除狗狗" }).click();
     await page.waitForURL("/dogs");
-    await page.close();
+    await ctx.close();
   });
 
   test("照護頁面顯示空狀態", async ({ page }) => {

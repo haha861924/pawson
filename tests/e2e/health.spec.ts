@@ -5,23 +5,25 @@ test.describe("健康照護", () => {
   let dogId: string;
 
   test.beforeAll(async ({ browser }) => {
-    const page = await browser.newPage();
+    const ctx = await browser.newContext({ storageState: "tests/.auth/user.json" });
+    const page = await ctx.newPage();
     await page.goto("/dogs/new");
     await page.getByLabel("名字 *").fill(`健康測試_${Date.now()}`);
     await page.getByRole("button", { name: "儲存" }).click();
     await page.waitForURL(/\/dogs\/(?!new)[^/]+$/);
     dogId = page.url().split("/dogs/")[1];
-    await page.close();
+    await ctx.close();
   });
 
   test.afterAll(async ({ browser }) => {
     if (!dogId) return;
-    const page = await browser.newPage();
+    const ctx = await browser.newContext({ storageState: "tests/.auth/user.json" });
+    const page = await ctx.newPage();
     await page.goto(`/dogs/${dogId}`);
     await page.getByRole("button", { name: "刪除", exact: false }).click();
     await page.getByRole("button", { name: "刪除狗狗" }).click();
     await page.waitForURL("/dogs");
-    await page.close();
+    await ctx.close();
   });
 
   test("健康頁面初始顯示空狀態", async ({ page }) => {
@@ -62,8 +64,9 @@ test.describe("健康照護", () => {
     const nextDue = format(addDays(new Date(), 7), "yyyy-MM-dd");
     await page.getByLabel("下次日期").fill(nextDue);
     await page.getByRole("button", { name: "儲存" }).click();
+    await page.waitForURL(`/dogs/${dogId}/health`);
 
     await page.goto("/");
-    await expect(page.getByText("心絲蟲預防藥")).toBeVisible();
+    await expect(page.getByText("心絲蟲預防藥").first()).toBeVisible();
   });
 });

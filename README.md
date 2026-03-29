@@ -1,6 +1,6 @@
 # Pawson 🐾
 
-寵物犬隻管理系統 — 追蹤狗狗的照護、餵食、健康與花費紀錄。
+寵物犬隻管理系統 — 多人共養、追蹤狗狗的照護、餵食、健康與花費紀錄。
 
 ## 技術棧
 
@@ -12,7 +12,8 @@
 | Tailwind CSS | 4 |
 | shadcn/ui (base-ui variant) | - |
 | Prisma ORM | 7 |
-| SQLite (better-sqlite3) | - |
+| PostgreSQL (Supabase) | - |
+| NextAuth.js | v5 beta |
 | Zod | 4 |
 | Recharts | - |
 
@@ -20,8 +21,31 @@
 
 ```bash
 npm install
-npm run dev        # 開發伺服器 http://localhost:3000
+cp .env.example .env   # 填入必要環境變數
+npm run dev            # 開發伺服器 http://localhost:3000
 ```
+
+## 環境變數
+
+```bash
+# Supabase PostgreSQL
+DATABASE_URL="postgresql://..."        # Transaction pooler (pgbouncer=true)
+DIRECT_URL="postgresql://..."          # Direct connection，供 Prisma 遷移使用
+
+# NextAuth
+AUTH_SECRET="..."                      # 隨機亂數，可用 openssl rand -hex 32 產生
+
+# Google OAuth（可選）
+GOOGLE_CLIENT_ID="..."
+GOOGLE_CLIENT_SECRET="..."
+
+# Supabase Storage（production 圖片上傳必填）
+SUPABASE_URL="https://<project-ref>.supabase.co"
+SUPABASE_SERVICE_ROLE_KEY="..."        # Supabase Dashboard → Settings → API → service_role
+```
+
+> **本機開發**：未設定 `SUPABASE_SERVICE_ROLE_KEY` 時，圖片改存至 `public/uploads/`（本機路徑，不納入 git）。
+> **Production**：必須在 Supabase Dashboard → Storage 建立名為 `pawson-uploads` 的 **public bucket**。
 
 ## 常用指令
 
@@ -32,7 +56,7 @@ npm run lint       # ESLint 檢查
 
 # 資料庫
 npx prisma migrate dev --name <名稱>   # 建立並套用新遷移
-npx prisma migrate deploy              # 套用待定遷移
+npx prisma migrate deploy              # 套用待定遷移（CI/CD）
 npx prisma generate                    # 更新 Prisma client（schema 變更後必跑）
 npx prisma studio                      # 資料庫 GUI
 ```
@@ -58,18 +82,38 @@ async function action(_prev: unknown, fd: FormData) {
 - Server Components / layouts → 從 `@/lib/button-variants` 匯入 `buttonVariants`
 - Client form Components → 從 `@/components/ui/button` 匯入 `Button`，從 `@/lib/button-variants` 匯入 `buttonVariants`
 
+**Select 顯示 label：** base-ui 的 `Select.Value` 不自動顯示 `ItemText`，必須在 `<Select>` 根元件傳入 `items` prop（`Record<string, string>`）：
+
+```tsx
+<Select name="type" items={Object.fromEntries(CARE_TYPES.map((t) => [t.value, t.label]))}>
+  <SelectTrigger><SelectValue placeholder="選擇類型" /></SelectTrigger>
+  ...
+</Select>
+```
+
 **驗證：** 所有表單資料透過 `lib/validations.ts` 的 Zod schema 驗證。錯誤訊息使用繁體中文。回傳格式統一為 `{ error?: Record<string, string[]> } | void`。
+
+### 認證與權限
+
+- 使用 NextAuth v5（credentials + Google OAuth）
+- 路由 `/dogs/*`、`/expenses/*` 需登入（Middleware 守衛）
+- 每隻狗狗透過 `DogMember` 關聯使用者，角色分為 `OWNER`（飼主）/ `CARETAKER`（共同扶養）
+- 權限欄位：`canView`（預設 true）、`canEdit`（預設 false，OWNER 為 true）
+- Server Action 權限檢查工具：`assertCanEdit(userId, dogId)`、`assertOwner(userId, dogId)`
+- **邀請限制**：邀請成員透過電子郵件查詢已註冊帳號（`prisma.user.findUnique({ where: { email } })`）；若對方尚未在 Pawson 建立帳號，系統回傳錯誤「找不到此電子郵件的使用者」
 
 ### 資料庫規則
 
-- SQLite 預設不啟用外鍵，**刪除父記錄前必須手動刪除子記錄**（見 `deleteDog`）。
-- Schema 變更後必須依序執行：`prisma migrate dev` → `prisma generate`。
-- Prisma client singleton 在 `lib/prisma.ts`，使用 `PrismaBetterSqlite3` 適配器，直接指向 `./dev.db`。
+- PostgreSQL（Supabase）+ `@prisma/adapter-pg`
+- `DATABASE_URL` 使用 pgbouncer transaction pool，`DIRECT_URL` 供遷移使用
+- Schema 變更後必須依序執行：`prisma migrate dev` → `prisma generate`
 
 ### 路由結構
 
 ```
 /                          首頁 dashboard
+/auth/login                登入
+/auth/register             註冊
 /dogs                      犬隻列表
 /dogs/new                  新增狗狗
 /dogs/[dogId]              狗狗總覽
@@ -78,6 +122,7 @@ async function action(_prev: unknown, fd: FormData) {
 /dogs/[dogId]/feeding      飼料管理 + 飼料評論
 /dogs/[dogId]/health       健康照護 + 用藥提醒
 /dogs/[dogId]/expenses     單狗花費
+/dogs/[dogId]/members      成員管理（飼主限定）
 /expenses                  全部花費統計（含篩選與圖表）
 ```
 
@@ -98,8 +143,9 @@ async function action(_prev: unknown, fd: FormData) {
 ### 圖片上傳
 
 - API Route：`POST /api/upload`（最大 5MB，支援 JPG/PNG/WebP/GIF）
-- 上傳後回傳 `{ url: string }`，路徑格式為 `/uploads/<filename>`
-- 檔案存放於 `public/uploads/`（已加入 `.gitignore` 中的靜態資源）
+- 上傳後回傳 `{ url: string }`
+- **本機**（未設定 Supabase Storage 環境變數）：存至 `public/uploads/`
+- **Production**：上傳至 Supabase Storage bucket `pawson-uploads`，回傳公開 URL
 
 ### 統一發票
 
@@ -121,14 +167,31 @@ async function action(_prev: unknown, fd: FormData) {
 
 全域花費頁 `/expenses` 支援依狗狗、品種、類別篩選。
 
+### 測試
+
+```bash
+# 單元測試（Vitest）
+npx vitest run
+
+# E2E 測試（Playwright）— 需先啟動開發伺服器
+npm run dev &
+npx playwright test
+
+# 可選：透過環境變數指定 E2E 測試帳號（預設使用 e2e@pawson.test）
+E2E_EMAIL=your@email.com E2E_PASSWORD=YourPassword npx playwright test
+```
+
+> E2E 測試的 global setup 會自動建立測試帳號（若不存在），並將 session 儲存至 `tests/.auth/user.json`。
+
 ---
 
 ## 功能清單
 
 | 功能 | 路徑 |
 |------|------|
-| 犬隻管理（含大頭貼上傳） | `/dogs` |
-| 列表一鍵快速操作 | `/dogs`（每張卡片） |
+| 會員登入（email/密碼 + Google） | `/auth/login` |
+| 犬隻管理（含大頭貼、晶片號碼） | `/dogs` |
+| 成員管理（邀請、權限、移除） | `/dogs/[dogId]/members` |
 | 日常照護記錄 | `/dogs/[dogId]/care` |
 | 飼料管理 + 餵食記錄 | `/dogs/[dogId]/feeding` |
 | 飼料評論（星等+文字） | `/dogs/[dogId]/feeding` |

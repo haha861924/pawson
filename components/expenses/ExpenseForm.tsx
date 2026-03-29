@@ -52,7 +52,7 @@ export function ExpenseForm({
       ) : (
         <div className="space-y-1">
           <Label htmlFor="dogId">狗狗 *</Label>
-          <Select name="dogId" required>
+          <Select name="dogId" required items={Object.fromEntries(dogs.map((d) => [d.id, d.name]))}>
             <SelectTrigger id="dogId">
               <SelectValue placeholder="選擇狗狗" />
             </SelectTrigger>
@@ -70,7 +70,7 @@ export function ExpenseForm({
 
       <div className="space-y-1">
         <Label htmlFor="category">類別 *</Label>
-        <Select name="category" required>
+        <Select name="category" required items={Object.fromEntries(EXPENSE_CATEGORIES.map((c) => [c.value, c.label]))}>
           <SelectTrigger id="category">
             <SelectValue placeholder="選擇類別" />
           </SelectTrigger>

@@ -75,16 +75,18 @@ model DogMember {
 }
 
 model Dog {
-  id        String    @id @default(cuid())
-  name      String
-  breed     String?
-  dob       DateTime?
-  weight    Float?
-  sex       String?
-  notes     String?
-  avatarUrl String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id               String    @id @default(cuid())
+  name             String
+  breed            String?
+  dob              DateTime?
+  weight           Float?
+  sex              String?
+  notes            String?
+  avatarUrl        String?
+  chipNumber       String?
+  motherChipNumber String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   careRecords   CareRecord[]
   feedRecords   FeedRecord[]

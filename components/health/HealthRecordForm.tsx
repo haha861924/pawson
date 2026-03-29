@@ -34,7 +34,7 @@ export function HealthRecordForm({ action, cancelHref }: HealthRecordFormProps) 
     <form action={formAction} className="space-y-4 max-w-lg">
       <div className="space-y-1">
         <Label htmlFor="type">類型 *</Label>
-        <Select name="type" required>
+        <Select name="type" required items={Object.fromEntries(HEALTH_TYPES.map((t) => [t.value, t.label]))}>
           <SelectTrigger id="type">
             <SelectValue placeholder="選擇健康記錄類型" />
           </SelectTrigger>
@@ -76,6 +76,7 @@ export function HealthRecordForm({ action, cancelHref }: HealthRecordFormProps) 
         <Select
           value={reminderInterval}
           onValueChange={(v) => setReminderInterval(v ?? "")}
+          items={{ none: "不設定週期", ...Object.fromEntries(REMINDER_INTERVALS.map((r) => [r.value, r.label])) }}
         >
           <SelectTrigger id="reminderInterval">
             <SelectValue placeholder="選擇週期（自動計算下次日期）" />

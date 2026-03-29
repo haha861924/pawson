@@ -22,6 +22,8 @@ export const dogSchema = z.object({
   weight: z.coerce.number().positive().optional().or(z.literal("")),
   sex: z.string().optional(),
   notes: z.string().optional(),
+  chipNumber: z.string().optional(),
+  motherChipNumber: z.string().optional(),
 });
 
 export const careSchema = z.object({

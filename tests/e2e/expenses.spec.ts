@@ -4,23 +4,25 @@ test.describe("花費記錄", () => {
   let dogId: string;
 
   test.beforeAll(async ({ browser }) => {
-    const page = await browser.newPage();
+    const ctx = await browser.newContext({ storageState: "tests/.auth/user.json" });
+    const page = await ctx.newPage();
     await page.goto("/dogs/new");
     await page.getByLabel("名字 *").fill(`花費測試_${Date.now()}`);
     await page.getByRole("button", { name: "儲存" }).click();
     await page.waitForURL(/\/dogs\/(?!new)[^/]+$/);
     dogId = page.url().split("/dogs/")[1];
-    await page.close();
+    await ctx.close();
   });
 
   test.afterAll(async ({ browser }) => {
     if (!dogId) return;
-    const page = await browser.newPage();
+    const ctx = await browser.newContext({ storageState: "tests/.auth/user.json" });
+    const page = await ctx.newPage();
     await page.goto(`/dogs/${dogId}`);
     await page.getByRole("button", { name: "刪除", exact: false }).click();
     await page.getByRole("button", { name: "刪除狗狗" }).click();
     await page.waitForURL("/dogs");
-    await page.close();
+    await ctx.close();
   });
 
   test("花費頁面顯示正確統計初始狀態", async ({ page }) => {
@@ -43,14 +45,14 @@ test.describe("花費記錄", () => {
     await page.getByRole("button", { name: "儲存" }).click();
 
     await expect(page).toHaveURL(`/dogs/${dogId}/expenses`);
-    await expect(page.getByText("年度健康檢查")).toBeVisible();
+    await expect(page.getByText("年度健康檢查").first()).toBeVisible();
     await expect(page.getByText("獸醫").first()).toBeVisible();
   });
 
   test("全部花費統計頁面顯示該筆花費", async ({ page }) => {
     await page.goto("/expenses");
     await expect(page.getByRole("heading", { name: "全部花費統計" })).toBeVisible();
-    await expect(page.getByText("年度健康檢查")).toBeVisible();
+    await expect(page.getByText("年度健康檢查").first()).toBeVisible();
   });
 
   test("可以新增全域花費（從 /expenses/new）", async ({ page }) => {
@@ -72,6 +74,6 @@ test.describe("花費記錄", () => {
     await page.getByRole("button", { name: "儲存" }).click();
 
     await expect(page).toHaveURL("/expenses");
-    await expect(page.getByText("每月飼料費")).toBeVisible();
+    await expect(page.getByText("每月飼料費").first()).toBeVisible();
   });
 });

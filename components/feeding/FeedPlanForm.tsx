@@ -49,7 +49,7 @@ export function FeedPlanForm({ action, cancelHref }: FeedPlanFormProps) {
 
       <div className="space-y-1">
         <Label htmlFor="frequency">頻率 *</Label>
-        <Select name="frequency" required>
+        <Select name="frequency" required items={Object.fromEntries(FEED_FREQUENCIES.map((f) => [f.value, f.label]))}>
           <SelectTrigger id="frequency">
             <SelectValue placeholder="選擇餵食頻率" />
           </SelectTrigger>

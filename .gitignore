@@ -45,3 +45,4 @@ dev.db
 prisma/dev.db
 playwright-report/
 test-results/
+tests/.auth/

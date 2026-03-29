@@ -61,7 +61,7 @@ export function FeedRecordForm({
 
         <div className="space-y-1">
           <Label htmlFor="mealTime">餐次</Label>
-          <Select name="mealTime">
+          <Select name="mealTime" items={Object.fromEntries(MEAL_TIMES.map((t) => [t.value, t.label]))}>
             <SelectTrigger id="mealTime">
               <SelectValue placeholder="選擇餐次" />
             </SelectTrigger>

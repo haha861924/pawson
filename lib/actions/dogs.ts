@@ -41,7 +41,7 @@ export async function createDog(
   if (!parsed.success) {
     return { error: parsed.error.flatten().fieldErrors };
   }
-  const { name, breed, dob, weight, sex, notes } = parsed.data;
+  const { name, breed, dob, weight, sex, notes, chipNumber, motherChipNumber } = parsed.data;
   const avatarUrl = (raw.avatarUrl as string) || null;
   const dog = await prisma.dog.create({
     data: {
@@ -52,6 +52,8 @@ export async function createDog(
       sex: sex || null,
       notes: notes || null,
       avatarUrl,
+      chipNumber: chipNumber || null,
+      motherChipNumber: motherChipNumber || null,
       members: {
         create: { userId, role: "OWNER", canView: true, canEdit: true },
       },
@@ -74,7 +76,7 @@ export async function updateDog(
   if (!parsed.success) {
     return { error: parsed.error.flatten().fieldErrors };
   }
-  const { name, breed, dob, weight, sex, notes } = parsed.data;
+  const { name, breed, dob, weight, sex, notes, chipNumber, motherChipNumber } = parsed.data;
   const avatarUrl = (raw.avatarUrl as string) || null;
   await prisma.dog.update({
     where: { id },
@@ -86,6 +88,8 @@ export async function updateDog(
       sex: sex || null,
       notes: notes || null,
       avatarUrl,
+      chipNumber: chipNumber || null,
+      motherChipNumber: motherChipNumber || null,
     },
   });
   revalidatePath(`/dogs/${id}`);

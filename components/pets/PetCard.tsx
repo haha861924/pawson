@@ -39,9 +39,9 @@ const quickActions = [
 export function PetCard({ pet, disableActions = false }: PetCardProps) {
   return (
     <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="pt-6">
+      <CardContent className="pt-2">
         <Link href={disableActions ? "#" : `/pets/${pet.id}`} className="block" tabIndex={disableActions ? -1 : undefined}>
-          <div className="flex items-start gap-4">
+          <div className="flex items-start gap-4 min-h-[100px]">
             <PetAvatar name={pet.name} avatarUrl={pet.avatarUrl} size="lg" />
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-lg">{pet.name}</h3>

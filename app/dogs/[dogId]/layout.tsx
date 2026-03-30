@@ -15,6 +15,7 @@ const tabs = [
   { href: "/care", label: "日常照護" },
   { href: "/feeding", label: "飼料" },
   { href: "/health", label: "健康照護" },
+  { href: "/diary", label: "成長曲線" },
   { href: "/expenses", label: "花費" },
   { href: "/members", label: "成員", ownerOnly: true },
 ];

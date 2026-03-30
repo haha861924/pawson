@@ -52,6 +52,26 @@ export const DOG_SEX = [
   { value: "female", label: "母" },
 ] as const;
 
+export const APPETITE_OPTIONS = [
+  { value: "excellent", label: "極佳" },
+  { value: "good", label: "良好" },
+  { value: "reduced", label: "減少" },
+  { value: "poor", label: "很差" },
+] as const;
+
+export const STOOL_OPTIONS = [
+  { value: "normal", label: "正常" },
+  { value: "soft", label: "軟便" },
+  { value: "diarrhea", label: "拉肚子" },
+  { value: "constipation", label: "便秘" },
+] as const;
+
+export const MOOD_OPTIONS = [
+  { value: "energetic", label: "活潑有精神" },
+  { value: "normal", label: "正常" },
+  { value: "lethargic", label: "無精打采" },
+] as const;
+
 export function getLabel(
   list: readonly { value: string; label: string }[],
   value: string

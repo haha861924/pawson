@@ -93,8 +93,10 @@ model Dog {
   feedPlans     FeedPlan[]
   healthRecords HealthRecord[]
   expenses      Expense[]
-  feedReviews   FeedReview[]
-  members       DogMember[]
+  feedReviews    FeedReview[]
+  members        DogMember[]
+  weightRecords  WeightRecord[]
+  dailyHealthLog DailyHealthLog[]
 }
 
 model CareRecord {
@@ -186,3 +188,34 @@ model FeedReview {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model WeightRecord {
+  id        String   @id @default(cuid())
+  dogId     String
+  dog       Dog      @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  weight    Float    // in kg
+  date      DateTime @default(now())
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DailyHealthLog {
+  id             String   @id @default(cuid())
+  dogId          String
+  dog            Dog      @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  date           DateTime
+  weight         Float?   // in kg
+  appetite       String?  // "excellent" | "good" | "reduced" | "poor"
+  stoolCondition String?  // "normal" | "soft" | "diarrhea" | "constipation"
+  mood           String?  // "energetic" | "normal" | "lethargic"
+  hasVomiting    Boolean  @default(false)
+  temperature    Float?   // in celsius
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([dogId, date])
+  @@index([dogId, date])
+}
+

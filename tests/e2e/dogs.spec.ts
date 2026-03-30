@@ -40,7 +40,7 @@ test.describe("犬隻管理", () => {
 
     const dogName = `晶片測試_${Date.now()}`;
     await page.getByLabel("名字 *").fill(dogName);
-    await page.getByLabel("晶片號碼").fill("123456789012345");
+    await page.getByLabel("晶片號碼", { exact: true }).fill("123456789012345");
     await page.getByLabel("母犬晶片號碼").fill("987654321098765");
 
     await page.getByRole("button", { name: "儲存" }).click();
@@ -64,7 +64,7 @@ test.describe("犬隻管理", () => {
     await page.waitForURL(/\/dogs\/(?!new)[^/]+$/);
 
     // Click pencil edit button in header
-    await page.getByRole("link", { name: "編輯" }).click();
+    await page.getByRole("link", { name: "編輯", exact: true }).click();
     await expect(page).toHaveURL(/\/dogs\/[^/]+\/edit$/);
 
     const updatedName = `${dogName}_已編輯`;

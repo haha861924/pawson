@@ -78,3 +78,25 @@ export const expenseSchema = z.object({
     "格式應為兩個大寫英文字母加八位數字，例如：AB12345678"
   ),
 });
+
+export const weightRecordSchema = z.object({
+  weight: z.coerce.number().positive("請輸入有效體重"),
+  date: z.string().min(1, "請選擇日期"),
+  notes: z.string().optional(),
+});
+
+export const dailyHealthLogSchema = z.object({
+  date: z.string().min(1, "請選擇日期"),
+  weight: z.coerce.number().positive("體重必須大於 0").optional().or(z.literal("")),
+  appetite: z.string().optional(),
+  stoolCondition: z.string().optional(),
+  mood: z.string().optional(),
+  hasVomiting: z.coerce.boolean(),
+  temperature: z.coerce
+    .number()
+    .min(35, "體溫不可低於 35°C")
+    .max(45, "體溫不可高於 45°C")
+    .optional()
+    .or(z.literal("")),
+  notes: z.string().optional(),
+});

@@ -50,7 +50,7 @@ export async function updateMemberPermissions(
   dogId: string,
   memberId: string,
   data: { canView?: boolean; canEdit?: boolean }
-) {
+): Promise<{ success: boolean }> {
   const session = await getRequiredSession();
   await assertOwner(session.user.id, dogId);
 
@@ -60,9 +60,10 @@ export async function updateMemberPermissions(
 
   await prisma.dogMember.update({ where: { id: memberId }, data });
   revalidatePath(`/dogs/${dogId}/members`);
+  return { success: true };
 }
 
-export async function removeMember(dogId: string, memberId: string) {
+export async function removeMember(dogId: string, memberId: string): Promise<{ success: boolean }> {
   const session = await getRequiredSession();
   await assertOwner(session.user.id, dogId);
 
@@ -72,4 +73,5 @@ export async function removeMember(dogId: string, memberId: string) {
 
   await prisma.dogMember.delete({ where: { id: memberId } });
   revalidatePath(`/dogs/${dogId}/members`);
+  return { success: true };
 }

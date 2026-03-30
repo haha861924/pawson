@@ -7,6 +7,9 @@ import {
   FEED_FREQUENCIES,
   MEAL_TIMES,
   DOG_SEX,
+  APPETITE_OPTIONS,
+  STOOL_OPTIONS,
+  MOOD_OPTIONS,
 } from "@/lib/types";
 
 describe("getLabel", () => {
@@ -52,5 +55,25 @@ describe("getLabel", () => {
   it("covers DOG_SEX", () => {
     expect(getLabel(DOG_SEX, "male")).toBe("公");
     expect(getLabel(DOG_SEX, "female")).toBe("母");
+  });
+
+  it("covers APPETITE_OPTIONS", () => {
+    expect(getLabel(APPETITE_OPTIONS, "excellent")).toBe("極佳");
+    expect(getLabel(APPETITE_OPTIONS, "good")).toBe("良好");
+    expect(getLabel(APPETITE_OPTIONS, "reduced")).toBe("減少");
+    expect(getLabel(APPETITE_OPTIONS, "poor")).toBe("很差");
+  });
+
+  it("covers STOOL_OPTIONS", () => {
+    expect(getLabel(STOOL_OPTIONS, "normal")).toBe("正常");
+    expect(getLabel(STOOL_OPTIONS, "soft")).toBe("軟便");
+    expect(getLabel(STOOL_OPTIONS, "diarrhea")).toBe("拉肚子");
+    expect(getLabel(STOOL_OPTIONS, "constipation")).toBe("便秘");
+  });
+
+  it("covers MOOD_OPTIONS", () => {
+    expect(getLabel(MOOD_OPTIONS, "energetic")).toBe("活潑有精神");
+    expect(getLabel(MOOD_OPTIONS, "normal")).toBe("正常");
+    expect(getLabel(MOOD_OPTIONS, "lethargic")).toBe("無精打采");
   });
 });

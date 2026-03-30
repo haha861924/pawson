@@ -7,6 +7,7 @@ import {
   feedRecordSchema,
   healthSchema,
   expenseSchema,
+  dailyHealthLogSchema,
 } from "@/lib/validations";
 
 describe("dogSchema", () => {
@@ -208,5 +209,120 @@ describe("expenseSchema", () => {
       date: "2024-01-01",
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("dailyHealthLogSchema", () => {
+  it("passes with only required date", () => {
+    const result = dailyHealthLogSchema.safeParse({
+      date: "2024-01-01",
+      hasVomiting: "false",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("passes with all fields", () => {
+    const result = dailyHealthLogSchema.safeParse({
+      date: "2024-01-01",
+      weight: "25.5",
+      appetite: "good",
+      stoolCondition: "normal",
+      mood: "energetic",
+      hasVomiting: "true",
+      temperature: "38.5",
+      notes: "今天很活潑",
+    });
+    expect(result.success).toBe(true);
+    expect(result.data?.weight).toBe(25.5);
+    expect(result.data?.temperature).toBe(38.5);
+    expect(result.data?.hasVomiting).toBe(true);
+  });
+
+  it("fails without date", () => {
+    const result = dailyHealthLogSchema.safeParse({ hasVomiting: "false" });
+    expect(result.success).toBe(false);
+    expect(result.error?.flatten().fieldErrors.date).toBeDefined();
+  });
+
+  it("rejects negative weight", () => {
+    const result = dailyHealthLogSchema.safeParse({
+      date: "2024-01-01",
+      weight: "-5",
+      hasVomiting: "false",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects weight of 0", () => {
+    const result = dailyHealthLogSchema.safeParse({
+      date: "2024-01-01",
+      weight: "0",
+      hasVomiting: "false",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts empty string for optional weight", () => {
+    const result = dailyHealthLogSchema.safeParse({
+      date: "2024-01-01",
+      weight: "",
+      hasVomiting: "false",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects temperature below 35", () => {
+    const result = dailyHealthLogSchema.safeParse({
+      date: "2024-01-01",
+      temperature: "30",
+      hasVomiting: "false",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects temperature above 45", () => {
+    const result = dailyHealthLogSchema.safeParse({
+      date: "2024-01-01",
+      temperature: "50",
+      hasVomiting: "false",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts temperature within range", () => {
+    const result = dailyHealthLogSchema.safeParse({
+      date: "2024-01-01",
+      temperature: "38.5",
+      hasVomiting: "false",
+    });
+    expect(result.success).toBe(true);
+    expect(result.data?.temperature).toBe(38.5);
+  });
+
+  it("coerces hasVomiting string to boolean", () => {
+    // When checkbox is unchecked, no value is sent, so it becomes undefined or empty string
+    const uncheckedResult = dailyHealthLogSchema.safeParse({
+      date: "2024-01-01",
+      hasVomiting: undefined,
+    });
+    expect(uncheckedResult.success).toBe(true);
+    expect(uncheckedResult.data?.hasVomiting).toBe(false);
+
+    // When checkbox is checked, it sends "on" or the value attribute
+    const checkedResult = dailyHealthLogSchema.safeParse({
+      date: "2024-01-01",
+      hasVomiting: "on",
+    });
+    expect(checkedResult.success).toBe(true);
+    expect(checkedResult.data?.hasVomiting).toBe(true);
+  });
+
+  it("accepts empty string for optional temperature", () => {
+    const result = dailyHealthLogSchema.safeParse({
+      date: "2024-01-01",
+      temperature: "",
+      hasVomiting: "false",
+    });
+    expect(result.success).toBe(true);
   });
 });

@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 type ActionResult = { error?: string; success?: string } | undefined;
 
@@ -13,9 +14,20 @@ interface InviteMemberFormProps {
 
 export function InviteMemberForm({ action }: InviteMemberFormProps) {
   const [state, formAction, pending] = useActionState(action, undefined);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (state?.success) {
+      toast.success(state.success);
+      formRef.current?.reset();
+    }
+    if (state?.error) {
+      toast.error(state.error);
+    }
+  }, [state]);
 
   return (
-    <form action={formAction} className="space-y-3">
+    <form ref={formRef} action={formAction} className="space-y-3">
       <div className="space-y-1">
         <Label htmlFor="invite-email">電子郵件</Label>
         <div className="flex gap-2">
@@ -31,8 +43,6 @@ export function InviteMemberForm({ action }: InviteMemberFormProps) {
           </Button>
         </div>
       </div>
-      {state?.error && <p className="text-destructive text-sm">{state.error}</p>}
-      {state?.success && <p className="text-green-600 text-sm">{state.success}</p>}
     </form>
   );
 }

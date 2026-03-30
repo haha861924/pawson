@@ -39,7 +39,14 @@ export async function createWeightRecord(
     },
   });
 
+  // 同步更新寵物的最新體重
+  await prisma.pet.update({
+    where: { id: petId },
+    data: { weight },
+  });
+
   revalidatePath(`/pets/${petId}/weight`);
+  revalidatePath(`/pets/${petId}`);
   redirect(`/pets/${petId}/weight`);
 }
 
@@ -48,5 +55,18 @@ export async function deleteWeightRecord(id: string, petId: string) {
   await assertCanEdit(session.user.id, petId);
 
   await prisma.weightRecord.delete({ where: { id } });
+
+  // 刪除後查詢最新一筆體重記錄，同步更新 Pet.weight
+  const latest = await prisma.weightRecord.findFirst({
+    where: { petId },
+    orderBy: { date: "desc" },
+  });
+
+  await prisma.pet.update({
+    where: { id: petId },
+    data: { weight: latest?.weight ?? null },
+  });
+
   revalidatePath(`/pets/${petId}/weight`);
+  revalidatePath(`/pets/${petId}`);
 }

@@ -23,7 +23,7 @@ export async function registerUser(_prev: unknown, formData: FormData) {
   await prisma.user.create({ data: { name, email, passwordHash } });
 
   try {
-    await signIn("credentials", { email, password, redirectTo: "/dogs" });
+    await signIn("credentials", { email, password, redirectTo: "/pets" });
   } catch (e) {
     if ((e as { digest?: string }).digest?.startsWith("NEXT_REDIRECT")) throw e;
     return { error: "註冊成功，請重新登入" };
@@ -41,7 +41,7 @@ export async function loginUser(_prev: unknown, formData: FormData) {
   const { email, password } = result.data;
 
   try {
-    await signIn("credentials", { email, password, redirectTo: "/dogs" });
+    await signIn("credentials", { email, password, redirectTo: "/pets" });
   } catch (e) {
     if ((e as { digest?: string }).digest?.startsWith("NEXT_REDIRECT")) throw e;
     return { error: "電子郵件或密碼錯誤" };

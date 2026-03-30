@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 
 type ActionResult = { error?: Record<string, string[]> } | void;
 
-interface Dog {
+interface Pet {
   id: string;
   name: string;
 }
@@ -28,7 +28,7 @@ interface Dog {
 interface ExpenseFormProps {
   action: (prev: unknown, formData: FormData) => Promise<ActionResult>;
   cancelHref: string;
-  dogs: Dog[];
+  dogs: Pet[];
   preselectedDogId?: string;
   referer?: string;
 }
@@ -48,23 +48,23 @@ export function ExpenseForm({
       {referer && <input type="hidden" name="_referer" value={referer} />}
 
       {preselectedDogId ? (
-        <input type="hidden" name="dogId" value={preselectedDogId} />
+        <input type="hidden" name="petId" value={preselectedDogId} />
       ) : (
         <div className="space-y-1">
-          <Label htmlFor="dogId">狗狗 *</Label>
-          <Select name="dogId" required items={Object.fromEntries(dogs.map((d) => [d.id, d.name]))}>
-            <SelectTrigger id="dogId">
-              <SelectValue placeholder="選擇狗狗" />
+          <Label htmlFor="petId">寵物 *</Label>
+          <Select name="petId" required items={Object.fromEntries(dogs.map((d) => [d.id, d.name]))}>
+            <SelectTrigger id="petId">
+              <SelectValue placeholder="選擇寵物" />
             </SelectTrigger>
             <SelectContent>
-              {dogs.map((dog) => (
-                <SelectItem key={dog.id} value={dog.id}>
-                  {dog.name}
+              {dogs.map((pet) => (
+                <SelectItem key={pet.id} value={pet.id}>
+                  {pet.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          {errors.dogId && <p className="text-destructive text-xs">{errors.dogId[0]}</p>}
+          {errors.petId && <p className="text-destructive text-xs">{errors.petId[0]}</p>}
         </div>
       )}
 

@@ -18,7 +18,7 @@ model User {
 
   accounts       Account[]
   sessions       Session[]
-  dogMemberships DogMember[]
+  petMemberships PetMember[]
 }
 
 model Account {
@@ -57,26 +57,27 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model DogMember {
-  id       String @id @default(cuid())
-  dogId    String
-  userId   String
-  role     String @default("CARETAKER") // "OWNER" | "CARETAKER"
-  canView  Boolean @default(true)
-  canEdit  Boolean @default(false)
+model PetMember {
+  id      String  @id @default(cuid())
+  petId   String
+  userId  String
+  role    String  @default("CARETAKER") // "OWNER" | "CARETAKER"
+  canView Boolean @default(true)
+  canEdit Boolean @default(false)
 
-  dog  Dog  @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  pet  Pet  @relation(fields: [petId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([dogId, userId])
+  @@unique([petId, userId])
 }
 
-model Dog {
+model Pet {
   id               String    @id @default(cuid())
   name             String
+  species          String    @default("dog")
   breed            String?
   dob              DateTime?
   weight           Float?
@@ -94,15 +95,15 @@ model Dog {
   healthRecords HealthRecord[]
   expenses      Expense[]
   feedReviews    FeedReview[]
-  members        DogMember[]
+  members        PetMember[]
   weightRecords  WeightRecord[]
   dailyHealthLog DailyHealthLog[]
 }
 
 model CareRecord {
   id           String   @id @default(cuid())
-  dogId        String
-  dog          Dog      @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  petId        String
+  pet          Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
   date         DateTime @default(now())
   type         String
   durationMins Int?
@@ -114,8 +115,8 @@ model CareRecord {
 
 model FeedPlan {
   id          String   @id @default(cuid())
-  dogId       String
-  dog         Dog      @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  petId       String
+  pet         Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
   foodName    String
   brand       String?
   amountGrams Float
@@ -128,8 +129,8 @@ model FeedPlan {
 
 model FeedRecord {
   id          String   @id @default(cuid())
-  dogId       String
-  dog         Dog      @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  petId       String
+  pet         Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
   date        DateTime @default(now())
   foodName    String
   amountGrams Float
@@ -142,8 +143,8 @@ model FeedRecord {
 
 model HealthRecord {
   id               String    @id @default(cuid())
-  dogId            String
-  dog              Dog       @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  petId            String
+  pet              Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
   date             DateTime  @default(now())
   type             String
   title            String
@@ -159,8 +160,8 @@ model HealthRecord {
 
 model Expense {
   id             String        @id @default(cuid())
-  dogId          String
-  dog            Dog           @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  petId          String
+  pet            Pet           @relation(fields: [petId], references: [id], onDelete: Cascade)
   date           DateTime      @default(now())
   category       String
   amount         Float
@@ -179,8 +180,8 @@ model Expense {
 
 model FeedReview {
   id        String   @id @default(cuid())
-  dogId     String
-  dog       Dog      @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  petId     String
+  pet       Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
   foodName  String
   brand     String?
   rating    Int      // 1-5
@@ -191,8 +192,8 @@ model FeedReview {
 
 model WeightRecord {
   id        String   @id @default(cuid())
-  dogId     String
-  dog       Dog      @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  petId     String
+  pet       Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
   weight    Float    // in kg
   date      DateTime @default(now())
   notes     String?
@@ -202,8 +203,8 @@ model WeightRecord {
 
 model DailyHealthLog {
   id             String   @id @default(cuid())
-  dogId          String
-  dog            Dog      @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  petId          String
+  pet            Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
   date           DateTime
   weight         Float?   // in kg
   appetite       String?  // "excellent" | "good" | "reduced" | "poor"
@@ -215,7 +216,7 @@ model DailyHealthLog {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  @@unique([dogId, date])
-  @@index([dogId, date])
+  @@unique([petId, date])
+  @@index([petId, date])
 }
 

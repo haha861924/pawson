@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { getExpenses, getExpenseSummary, getBreeds } from "@/lib/actions/expenses";
-import { getDogs } from "@/lib/actions/dogs";
+import { getPets } from "@/lib/actions/pets";
 import { ExpenseList } from "@/components/expenses/ExpenseList";
 import { ExpenseSummary } from "@/components/expenses/ExpenseSummary";
 import { ExpenseChart } from "@/components/expenses/ExpenseChart";
@@ -11,7 +11,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { Suspense } from "react";
 
 interface SearchParams {
-  dogId?: string;
+  petId?: string;
   breed?: string;
   category?: string;
 }
@@ -21,12 +21,12 @@ export default async function AllExpensesPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  const { dogId, breed, category } = await searchParams;
+  const { petId, breed, category } = await searchParams;
 
-  const [allExpenses, summary, dogs, breeds] = await Promise.all([
-    getExpenses(dogId, breed),
-    getExpenseSummary(dogId, breed),
-    getDogs(),
+  const [allExpenses, summary, pets, breeds] = await Promise.all([
+    getExpenses(petId, breed),
+    getExpenseSummary(petId, breed),
+    getPets(),
     getBreeds(),
   ]);
 
@@ -39,15 +39,15 @@ export default async function AllExpensesPage({
     <div className="space-y-6">
       <PageHeader
         title="全部花費統計"
-        description="所有犬隻的花費總覽"
+        description="所有寵物的花費總覽"
         action={{ label: "新增花費", href: "/expenses/new" }}
       />
 
       <Suspense>
         <ExpenseFilter
-          dogs={dogs}
+          dogs={pets}
           breeds={breeds}
-          selectedDogId={dogId}
+          selectedDogId={petId}
           selectedBreed={breed}
           selectedCategory={category}
         />

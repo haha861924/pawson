@@ -5,7 +5,7 @@ import { DeleteButton } from "@/components/shared/DeleteButton";
 import { deleteExpense } from "@/lib/actions/expenses";
 import { EXPENSE_CATEGORIES, getLabel } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { DogAvatar } from "@/components/dogs/DogAvatar";
+import { PetAvatar } from "@/components/pets/PetAvatar";
 import { Receipt, ExternalLink } from "lucide-react";
 
 const categoryColor: Record<string, string> = {
@@ -20,14 +20,14 @@ const categoryColor: Record<string, string> = {
 
 interface Expense {
   id: string;
-  dogId: string;
+  petId: string;
   category: string;
   amount: number;
   description: string;
   date: Date;
   notes: string | null;
   invoiceNumber: string | null;
-  dog: { name: string; avatarUrl: string | null } | null;
+  pet: { name: string; avatarUrl: string | null } | null;
 }
 
 // Taiwan uniform invoice lottery query URL
@@ -46,8 +46,8 @@ export function ExpenseList({
     <div className="space-y-2">
       {expenses.map((expense) => (
         <div key={expense.id} className="flex items-start gap-3 p-4 rounded-lg border bg-card">
-          {showDog && expense.dog && (
-            <DogAvatar name={expense.dog.name} avatarUrl={expense.dog.avatarUrl} size="sm" />
+          {showDog && expense.pet && (
+            <PetAvatar name={expense.pet.name} avatarUrl={expense.pet.avatarUrl} size="sm" />
           )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
@@ -62,8 +62,8 @@ export function ExpenseList({
               <span className="font-semibold text-sm">
                 NT$ {expense.amount.toLocaleString()}
               </span>
-              {showDog && expense.dog && (
-                <span className="text-xs text-muted-foreground">{expense.dog.name}</span>
+              {showDog && expense.pet && (
+                <span className="text-xs text-muted-foreground">{expense.pet.name}</span>
               )}
             </div>
             <p className="text-sm mt-0.5">{expense.description}</p>
@@ -94,7 +94,7 @@ export function ExpenseList({
           </div>
           <DeleteButton
             onDelete={async () => {
-              await deleteExpense(expense.id, expense.dogId);
+              await deleteExpense(expense.id, expense.petId);
             }}
           />
         </div>

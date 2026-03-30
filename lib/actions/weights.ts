@@ -6,20 +6,20 @@ import { prisma } from "@/lib/prisma";
 import { weightRecordSchema } from "@/lib/validations";
 import { getRequiredSession, assertCanEdit } from "@/lib/auth-utils";
 
-export async function getWeightRecords(dogId: string) {
+export async function getWeightRecords(petId: string) {
   return prisma.weightRecord.findMany({
-    where: { dogId },
+    where: { petId },
     orderBy: { date: "desc" },
   });
 }
 
 export async function createWeightRecord(
-  dogId: string,
+  petId: string,
   _prev: unknown,
   formData: FormData
 ): Promise<{ error?: Record<string, string[]> } | void> {
   const session = await getRequiredSession();
-  await assertCanEdit(session.user.id, dogId);
+  await assertCanEdit(session.user.id, petId);
 
   const raw = Object.fromEntries(formData);
   const parsed = weightRecordSchema.safeParse(raw);
@@ -32,21 +32,21 @@ export async function createWeightRecord(
 
   await prisma.weightRecord.create({
     data: {
-      dogId,
+      petId,
       weight,
       date: new Date(date),
       notes: notes || null,
     },
   });
 
-  revalidatePath(`/dogs/${dogId}/weight`);
-  redirect(`/dogs/${dogId}/weight`);
+  revalidatePath(`/pets/${petId}/weight`);
+  redirect(`/pets/${petId}/weight`);
 }
 
-export async function deleteWeightRecord(id: string, dogId: string) {
+export async function deleteWeightRecord(id: string, petId: string) {
   const session = await getRequiredSession();
-  await assertCanEdit(session.user.id, dogId);
+  await assertCanEdit(session.user.id, petId);
 
   await prisma.weightRecord.delete({ where: { id } });
-  revalidatePath(`/dogs/${dogId}/weight`);
+  revalidatePath(`/pets/${petId}/weight`);
 }

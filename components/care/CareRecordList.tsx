@@ -16,10 +16,10 @@ interface CareRecord {
 
 export function CareRecordList({
   records,
-  dogId,
+  petId,
 }: {
   records: CareRecord[];
-  dogId: string;
+  petId: string;
 }) {
   return (
     <div className="space-y-2">
@@ -46,7 +46,7 @@ export function CareRecordList({
           </div>
           <DeleteButton
             onDelete={async () => {
-              await deleteCareRecord(record.id, dogId);
+              await deleteCareRecord(record.id, petId);
             }}
           />
         </div>

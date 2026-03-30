@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/lib/button-variants";
-import { getDogs } from "@/lib/actions/dogs";
+import { getPets } from "@/lib/actions/pets";
 import { getUpcomingHealthDue } from "@/lib/actions/health";
 import { getRequiredSession } from "@/lib/auth-utils";
 import { getExpenseSummary, getExpenses } from "@/lib/actions/expenses";
@@ -13,8 +13,8 @@ export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
   const session = await getRequiredSession();
-  const [dogs, upcomingHealth, summary, recentExpenses] = await Promise.all([
-    getDogs(),
+  const [pets, upcomingHealth, summary, recentExpenses] = await Promise.all([
+    getPets(),
     getUpcomingHealthDue(session.user.id, 30),
     getExpenseSummary(),
     getExpenses(),
@@ -34,8 +34,8 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <Card>
           <CardContent className="pt-4">
-            <p className="text-3xl font-bold">{dogs.length}</p>
-            <p className="text-sm text-muted-foreground">隻狗狗</p>
+            <p className="text-3xl font-bold">{pets.length}</p>
+            <p className="text-sm text-muted-foreground">隻寵物</p>
           </CardContent>
         </Card>
         <Card>
@@ -68,12 +68,12 @@ export default async function DashboardPage() {
                 {upcomingHealth.slice(0, 5).map((h: (typeof upcomingHealth)[number]) => (
                   <Link
                     key={h.id}
-                    href={`/dogs/${h.dogId}/health`}
+                    href={`/pets/${h.petId}/health`}
                     className="flex items-center gap-2 text-sm hover:opacity-70"
                   >
                     <HealthTypeBadge type={h.type} />
                     <span className="flex-1 truncate">
-                      {h.dog.name} · {h.title}
+                      {h.pet.name} · {h.title}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {h.nextDueDate && format(new Date(h.nextDueDate), "MM/dd")}
@@ -102,7 +102,7 @@ export default async function DashboardPage() {
                 {recent.map((e: (typeof recent)[number]) => (
                   <div key={e.id} className="flex justify-between text-sm">
                     <div className="flex-1 truncate">
-                      <span className="text-muted-foreground">{e.dog.name} · </span>
+                      <span className="text-muted-foreground">{e.pet.name} · </span>
                       {e.description}
                     </div>
                     <span className="font-medium ml-2">NT$ {e.amount.toLocaleString()}</span>
@@ -114,11 +114,11 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      {dogs.length === 0 && (
+      {pets.length === 0 && (
         <div className="mt-8 text-center py-12 border rounded-lg">
-          <p className="text-muted-foreground mb-4">還沒有任何狗狗，先新增一隻吧！</p>
-          <Link href="/dogs/new" className={buttonVariants()}>
-            新增狗狗
+          <p className="text-muted-foreground mb-4">還沒有任何寵物，先新增一隻吧！</p>
+          <Link href="/pets/new" className={buttonVariants()}>
+            新增寵物
           </Link>
         </div>
       )}

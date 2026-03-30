@@ -10,14 +10,14 @@ import {
 } from "@/components/ui/select";
 import { EXPENSE_CATEGORIES } from "@/lib/types";
 
-interface Dog {
+interface Pet {
   id: string;
   name: string;
   breed: string | null;
 }
 
 interface ExpenseFilterProps {
-  dogs: Dog[];
+  dogs: Pet[];
   breeds: string[];
   selectedDogId?: string;
   selectedBreed?: string;
@@ -42,34 +42,34 @@ export function ExpenseFilter({
     } else {
       params.delete(key);
     }
-    // When switching dog/breed filter, clear the other
-    if (key === "dogId") params.delete("breed");
-    if (key === "breed") params.delete("dogId");
+    // When switching pet/breed filter, clear the other
+    if (key === "petId") params.delete("breed");
+    if (key === "breed") params.delete("petId");
     router.push(`${pathname}?${params.toString()}`);
   }
 
   return (
     <div className="flex flex-wrap gap-3">
       <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground whitespace-nowrap">篩選狗狗：</span>
+        <span className="text-sm text-muted-foreground whitespace-nowrap">篩選寵物：</span>
         <Select
           value={selectedDogId ?? "all"}
-          onValueChange={(v) => update("dogId", v ?? "all")}
+          onValueChange={(v) => update("petId", v ?? "all")}
         >
           <SelectTrigger className="w-36 h-8 text-sm">
             <SelectValue>
               {(v: string | null) =>
                 v && v !== "all"
-                  ? (dogs.find((d) => d.id === v)?.name ?? "全部狗狗")
-                  : "全部狗狗"
+                  ? (dogs.find((d) => d.id === v)?.name ?? "全部寵物")
+                  : "全部寵物"
               }
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">全部狗狗</SelectItem>
-            {dogs.map((dog) => (
-              <SelectItem key={dog.id} value={dog.id}>
-                {dog.name}
+            <SelectItem value="all">全部寵物</SelectItem>
+            {dogs.map((pet) => (
+              <SelectItem key={pet.id} value={pet.id}>
+                {pet.name}
               </SelectItem>
             ))}
           </SelectContent>

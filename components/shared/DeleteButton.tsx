@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,8 +25,13 @@ export function DeleteButton({ onDelete, label = "刪除" }: DeleteButtonProps) 
 
   async function handleDelete() {
     setLoading(true);
-    await onDelete();
-    setLoading(false);
+    try {
+      await onDelete();
+    } catch {
+      toast.error("刪除失敗，請稍後再試");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

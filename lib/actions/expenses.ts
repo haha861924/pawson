@@ -6,28 +6,28 @@ import { prisma } from "@/lib/prisma";
 import { expenseSchema } from "@/lib/validations";
 import { getRequiredSession, assertCanEdit } from "@/lib/auth-utils";
 
-export async function getExpenses(dogId?: string, breed?: string) {
+export async function getExpenses(petId?: string, breed?: string) {
   const session = await getRequiredSession();
   const userId = session.user.id;
   return prisma.expense.findMany({
     where: {
-      dog: { members: { some: { userId, canView: true } } },
-      ...(dogId ? { dogId } : {}),
-      ...(breed ? { dog: { breed } } : {}),
+      pet: { members: { some: { userId, canView: true } } },
+      ...(petId ? { petId } : {}),
+      ...(breed ? { pet: { breed } } : {}),
     },
-    include: { dog: true },
+    include: { pet: true },
     orderBy: { date: "desc" },
   });
 }
 
-export async function getExpenseSummary(dogId?: string, breed?: string) {
+export async function getExpenseSummary(petId?: string, breed?: string) {
   const session = await getRequiredSession();
   const userId = session.user.id;
   const expenses = await prisma.expense.findMany({
     where: {
-      dog: { members: { some: { userId, canView: true } } },
-      ...(dogId ? { dogId } : {}),
-      ...(breed ? { dog: { breed } } : {}),
+      pet: { members: { some: { userId, canView: true } } },
+      ...(petId ? { petId } : {}),
+      ...(breed ? { pet: { breed } } : {}),
     },
     select: { amount: true, category: true, date: true },
   });
@@ -47,13 +47,13 @@ export async function getExpenseSummary(dogId?: string, breed?: string) {
 export async function getBreeds() {
   const session = await getRequiredSession();
   const userId = session.user.id;
-  const dogs = await prisma.dog.findMany({
+  const pets = await prisma.pet.findMany({
     where: { breed: { not: null }, members: { some: { userId, canView: true } } },
     select: { breed: true },
     distinct: ["breed"],
     orderBy: { breed: "asc" },
   });
-  return dogs.map((d) => d.breed!).filter(Boolean);
+  return pets.map((d) => d.breed!).filter(Boolean);
 }
 
 export async function createExpense(
@@ -66,11 +66,11 @@ export async function createExpense(
   if (!parsed.success) {
     return { error: parsed.error.flatten().fieldErrors };
   }
-  const { dogId, category, amount, description, date, notes, invoiceNumber } = parsed.data;
-  await assertCanEdit(session.user.id, dogId);
+  const { petId, category, amount, description, date, notes, invoiceNumber } = parsed.data;
+  await assertCanEdit(session.user.id, petId);
   await prisma.expense.create({
     data: {
-      dogId,
+      petId,
       category,
       amount: Number(amount),
       description,
@@ -79,16 +79,16 @@ export async function createExpense(
       invoiceNumber: invoiceNumber || null,
     },
   });
-  const referer = (raw._referer as string) || `/dogs/${dogId}/expenses`;
-  revalidatePath(`/dogs/${dogId}/expenses`);
+  const referer = (raw._referer as string) || `/pets/${petId}/expenses`;
+  revalidatePath(`/pets/${petId}/expenses`);
   revalidatePath("/expenses");
   redirect(referer);
 }
 
-export async function deleteExpense(id: string, dogId: string) {
+export async function deleteExpense(id: string, petId: string) {
   const session = await getRequiredSession();
-  await assertCanEdit(session.user.id, dogId);
+  await assertCanEdit(session.user.id, petId);
   await prisma.expense.delete({ where: { id } });
-  revalidatePath(`/dogs/${dogId}/expenses`);
+  revalidatePath(`/pets/${petId}/expenses`);
   revalidatePath("/expenses");
 }

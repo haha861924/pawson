@@ -12,8 +12,8 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Pawson - 狗狗管理工具",
-  description: "管理您的狗狗日常照護、飼料、健康及花費",
+  title: "Pawson - 寵物管理工具",
+  description: "管理您的寵物日常照護、飼料、健康及花費",
 };
 
 export default async function RootLayout({

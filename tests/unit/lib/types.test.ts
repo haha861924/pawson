@@ -6,7 +6,7 @@ import {
   EXPENSE_CATEGORIES,
   FEED_FREQUENCIES,
   MEAL_TIMES,
-  DOG_SEX,
+  PET_SEX,
   APPETITE_OPTIONS,
   STOOL_OPTIONS,
   MOOD_OPTIONS,
@@ -52,9 +52,9 @@ describe("getLabel", () => {
     expect(getLabel(MEAL_TIMES, "evening")).toBe("晚餐");
   });
 
-  it("covers DOG_SEX", () => {
-    expect(getLabel(DOG_SEX, "male")).toBe("公");
-    expect(getLabel(DOG_SEX, "female")).toBe("母");
+  it("covers PET_SEX", () => {
+    expect(getLabel(PET_SEX, "male")).toBe("公");
+    expect(getLabel(PET_SEX, "female")).toBe("母");
   });
 
   it("covers APPETITE_OPTIONS", () => {

@@ -22,10 +22,10 @@ interface HealthRecord {
 
 export function HealthRecordList({
   records,
-  dogId,
+  petId,
 }: {
   records: HealthRecord[];
-  dogId: string;
+  petId: string;
 }) {
   return (
     <div className="space-y-2">
@@ -70,7 +70,7 @@ export function HealthRecordList({
               </div>
               <DeleteButton
                 onDelete={async () => {
-                  await deleteHealthRecord(record.id, dogId);
+                  await deleteHealthRecord(record.id, petId);
                 }}
               />
             </div>

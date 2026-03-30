@@ -6,39 +6,39 @@ import { prisma } from "@/lib/prisma";
 import { feedPlanSchema, feedRecordSchema } from "@/lib/validations";
 import { getRequiredSession, assertCanEdit } from "@/lib/auth-utils";
 
-export async function getActiveFeedPlan(dogId: string) {
+export async function getActiveFeedPlan(petId: string) {
   return prisma.feedPlan.findFirst({
-    where: { dogId, isActive: true },
+    where: { petId, isActive: true },
     orderBy: { createdAt: "desc" },
   });
 }
 
-export async function getFeedRecordsByDog(dogId: string) {
+export async function getFeedRecords(petId: string) {
   return prisma.feedRecord.findMany({
-    where: { dogId },
+    where: { petId },
     orderBy: { date: "desc" },
   });
 }
 
 export async function createFeedPlan(
-  dogId: string,
+  petId: string,
   _prev: unknown,
   formData: FormData
 ): Promise<{ error?: Record<string, string[]> } | void> {
   const session = await getRequiredSession();
-  await assertCanEdit(session.user.id, dogId);
+  await assertCanEdit(session.user.id, petId);
   const raw = Object.fromEntries(formData);
   const parsed = feedPlanSchema.safeParse(raw);
   if (!parsed.success) {
     return { error: parsed.error.flatten().fieldErrors };
   }
   await prisma.feedPlan.updateMany({
-    where: { dogId, isActive: true },
+    where: { petId, isActive: true },
     data: { isActive: false },
   });
   await prisma.feedPlan.create({
     data: {
-      dogId,
+      petId,
       foodName: parsed.data.foodName,
       brand: parsed.data.brand || null,
       amountGrams: Number(parsed.data.amountGrams),
@@ -46,17 +46,17 @@ export async function createFeedPlan(
       notes: parsed.data.notes || null,
     },
   });
-  revalidatePath(`/dogs/${dogId}/feeding`);
-  redirect(`/dogs/${dogId}/feeding`);
+  revalidatePath(`/pets/${petId}/feeding`);
+  redirect(`/pets/${petId}/feeding`);
 }
 
 export async function createFeedRecord(
-  dogId: string,
+  petId: string,
   _prev: unknown,
   formData: FormData
 ): Promise<{ error?: Record<string, string[]> } | void> {
   const session = await getRequiredSession();
-  await assertCanEdit(session.user.id, dogId);
+  await assertCanEdit(session.user.id, petId);
   const raw = Object.fromEntries(formData);
   const parsed = feedRecordSchema.safeParse(raw);
   if (!parsed.success) {
@@ -65,7 +65,7 @@ export async function createFeedRecord(
   const { foodName, date, amountGrams, mealTime, notes } = parsed.data;
   await prisma.feedRecord.create({
     data: {
-      dogId,
+      petId,
       foodName,
       date: new Date(date),
       amountGrams: Number(amountGrams),
@@ -73,13 +73,13 @@ export async function createFeedRecord(
       notes: notes || null,
     },
   });
-  revalidatePath(`/dogs/${dogId}/feeding`);
-  redirect(`/dogs/${dogId}/feeding`);
+  revalidatePath(`/pets/${petId}/feeding`);
+  redirect(`/pets/${petId}/feeding`);
 }
 
-export async function deleteFeedRecord(id: string, dogId: string) {
+export async function deleteFeedRecord(id: string, petId: string) {
   const session = await getRequiredSession();
-  await assertCanEdit(session.user.id, dogId);
+  await assertCanEdit(session.user.id, petId);
   await prisma.feedRecord.delete({ where: { id } });
-  revalidatePath(`/dogs/${dogId}/feeding`);
+  revalidatePath(`/pets/${petId}/feeding`);
 }

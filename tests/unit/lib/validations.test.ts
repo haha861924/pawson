@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
-  dogSchema,
+  petSchema,
   inviteMemberSchema,
   careSchema,
   feedPlanSchema,
@@ -10,15 +10,16 @@ import {
   dailyHealthLogSchema,
 } from "@/lib/validations";
 
-describe("dogSchema", () => {
+describe("petSchema", () => {
   it("passes with name only", () => {
-    const result = dogSchema.safeParse({ name: "小白" });
+    const result = petSchema.safeParse({ name: "小白" });
     expect(result.success).toBe(true);
   });
 
   it("passes with all fields", () => {
-    const result = dogSchema.safeParse({
+    const result = petSchema.safeParse({
       name: "小黑",
+      species: "dog",
       breed: "柴犬",
       dob: "2020-01-01",
       weight: "5.5",
@@ -30,18 +31,32 @@ describe("dogSchema", () => {
   });
 
   it("fails when name is empty", () => {
-    const result = dogSchema.safeParse({ name: "" });
+    const result = petSchema.safeParse({ name: "" });
     expect(result.success).toBe(false);
     expect(result.error?.flatten().fieldErrors.name).toBeDefined();
   });
 
   it("accepts empty string weight (optional)", () => {
-    const result = dogSchema.safeParse({ name: "小白", weight: "" });
+    const result = petSchema.safeParse({ name: "小白", weight: "" });
     expect(result.success).toBe(true);
   });
 
+  it("accepts species field for different pet types", () => {
+    for (const species of ["dog", "cat", "rabbit", "bird"]) {
+      const result = petSchema.safeParse({ name: "小白", species });
+      expect(result.success).toBe(true);
+      expect(result.data?.species).toBe(species);
+    }
+  });
+
+  it("species is optional", () => {
+    const result = petSchema.safeParse({ name: "小白" });
+    expect(result.success).toBe(true);
+    expect(result.data?.species).toBeUndefined();
+  });
+
   it("accepts chipNumber and motherChipNumber", () => {
-    const result = dogSchema.safeParse({
+    const result = petSchema.safeParse({
       name: "小白",
       chipNumber: "123456789012345",
       motherChipNumber: "987654321098765",
@@ -52,7 +67,7 @@ describe("dogSchema", () => {
   });
 
   it("passes without chipNumber and motherChipNumber (optional)", () => {
-    const result = dogSchema.safeParse({ name: "小白" });
+    const result = petSchema.safeParse({ name: "小白" });
     expect(result.success).toBe(true);
     expect(result.data?.chipNumber).toBeUndefined();
     expect(result.data?.motherChipNumber).toBeUndefined();
@@ -168,7 +183,7 @@ describe("healthSchema", () => {
 describe("expenseSchema", () => {
   it("passes with all required fields", () => {
     const result = expenseSchema.safeParse({
-      dogId: "abc123",
+      petId: "abc123",
       category: "vet",
       amount: "500",
       description: "年度健檢",
@@ -180,7 +195,7 @@ describe("expenseSchema", () => {
 
   it("fails when amount is 0", () => {
     const result = expenseSchema.safeParse({
-      dogId: "abc123",
+      petId: "abc123",
       category: "vet",
       amount: "0",
       description: "健檢",
@@ -191,7 +206,7 @@ describe("expenseSchema", () => {
 
   it("fails without description", () => {
     const result = expenseSchema.safeParse({
-      dogId: "abc123",
+      petId: "abc123",
       category: "vet",
       amount: "500",
       description: "",
@@ -200,9 +215,9 @@ describe("expenseSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("fails without dogId", () => {
+  it("fails without petId", () => {
     const result = expenseSchema.safeParse({
-      dogId: "",
+      petId: "",
       category: "vet",
       amount: "500",
       description: "健檢",
@@ -300,7 +315,6 @@ describe("dailyHealthLogSchema", () => {
   });
 
   it("coerces hasVomiting string to boolean", () => {
-    // When checkbox is unchecked, no value is sent, so it becomes undefined or empty string
     const uncheckedResult = dailyHealthLogSchema.safeParse({
       date: "2024-01-01",
       hasVomiting: undefined,
@@ -308,7 +322,6 @@ describe("dailyHealthLogSchema", () => {
     expect(uncheckedResult.success).toBe(true);
     expect(uncheckedResult.data?.hasVomiting).toBe(false);
 
-    // When checkbox is checked, it sends "on" or the value attribute
     const checkedResult = dailyHealthLogSchema.safeParse({
       date: "2024-01-01",
       hasVomiting: "on",

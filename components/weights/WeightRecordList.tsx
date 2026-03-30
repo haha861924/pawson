@@ -14,10 +14,10 @@ interface WeightRecord {
 
 export function WeightRecordList({
   records,
-  dogId,
+  petId,
 }: {
   records: WeightRecord[];
-  dogId: string;
+  petId: string;
 }) {
   return (
     <div className="space-y-2">
@@ -37,7 +37,7 @@ export function WeightRecordList({
             </div>
             <DeleteButton
               onDelete={async () => {
-                await deleteWeightRecord(record.id, dogId);
+                await deleteWeightRecord(record.id, petId);
               }}
             />
           </div>

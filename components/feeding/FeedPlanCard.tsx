@@ -15,10 +15,10 @@ interface FeedPlan {
 
 export function FeedPlanCard({
   plan,
-  dogId,
+  petId,
 }: {
   plan: FeedPlan | null;
-  dogId: string;
+  petId: string;
 }) {
   if (!plan) {
     return (
@@ -26,7 +26,7 @@ export function FeedPlanCard({
         <CardContent className="pt-6 text-center py-8">
           <p className="text-muted-foreground text-sm">尚未設定飼料計劃</p>
           <Link
-            href={`/dogs/${dogId}/feeding/plan/new`}
+            href={`/pets/${petId}/feeding/plan/new`}
             className={cn(buttonVariants(), "mt-3 inline-flex")}
           >
             新增飼料計劃
@@ -42,7 +42,7 @@ export function FeedPlanCard({
         <div className="flex items-center justify-between">
           <CardTitle className="text-base">目前飼料計劃</CardTitle>
           <Link
-            href={`/dogs/${dogId}/feeding/plan/new`}
+            href={`/pets/${petId}/feeding/plan/new`}
             className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
           >
             更換

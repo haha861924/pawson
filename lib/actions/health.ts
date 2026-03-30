@@ -8,9 +8,9 @@ import { healthSchema } from "@/lib/validations";
 import { REMINDER_INTERVALS } from "@/lib/types";
 import { getRequiredSession, assertCanEdit } from "@/lib/auth-utils";
 
-export async function getHealthRecordsByDog(dogId: string) {
+export async function getHealthRecords(petId: string) {
   return prisma.healthRecord.findMany({
-    where: { dogId },
+    where: { petId },
     orderBy: { date: "desc" },
   });
 }
@@ -21,20 +21,20 @@ export async function getUpcomingHealthDue(userId: string, days = 30) {
   return prisma.healthRecord.findMany({
     where: {
       nextDueDate: { lte: cutoff },
-      dog: { members: { some: { userId, canView: true } } },
+      pet: { members: { some: { userId, canView: true } } },
     },
-    include: { dog: true },
+    include: { pet: true },
     orderBy: { nextDueDate: "asc" },
   });
 }
 
 export async function createHealthRecord(
-  dogId: string,
+  petId: string,
   _prev: unknown,
   formData: FormData
 ): Promise<{ error?: Record<string, string[]> } | void> {
   const session = await getRequiredSession();
-  await assertCanEdit(session.user.id, dogId);
+  await assertCanEdit(session.user.id, petId);
   const raw = Object.fromEntries(formData);
   const parsed = healthSchema.safeParse(raw);
   if (!parsed.success) {
@@ -55,7 +55,7 @@ export async function createHealthRecord(
 
   await prisma.healthRecord.create({
     data: {
-      dogId,
+      petId,
       type,
       title,
       date: new Date(date),
@@ -65,13 +65,13 @@ export async function createHealthRecord(
       reminderInterval: reminderInterval || null,
     },
   });
-  revalidatePath(`/dogs/${dogId}/health`);
-  redirect(`/dogs/${dogId}/health`);
+  revalidatePath(`/pets/${petId}/health`);
+  redirect(`/pets/${petId}/health`);
 }
 
-export async function deleteHealthRecord(id: string, dogId: string) {
+export async function deleteHealthRecord(id: string, petId: string) {
   const session = await getRequiredSession();
-  await assertCanEdit(session.user.id, dogId);
+  await assertCanEdit(session.user.id, petId);
   await prisma.healthRecord.delete({ where: { id } });
-  revalidatePath(`/dogs/${dogId}/health`);
+  revalidatePath(`/pets/${petId}/health`);
 }

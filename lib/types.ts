@@ -47,10 +47,16 @@ export const REMINDER_INTERVALS = [
   { value: "yearly", label: "每年", months: 12 },
 ] as const;
 
-export const DOG_SEX = [
+export const PET_SPECIES = [
+  { value: "dog", label: "狗" },
+  { value: "cat", label: "貓" },
+] as const;
+
+export const PET_SEX = [
   { value: "male", label: "公" },
   { value: "female", label: "母" },
 ] as const;
+
 
 export const APPETITE_OPTIONS = [
   { value: "excellent", label: "極佳" },

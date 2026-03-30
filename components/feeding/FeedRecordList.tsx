@@ -17,10 +17,10 @@ interface FeedRecord {
 
 export function FeedRecordList({
   records,
-  dogId,
+  petId,
 }: {
   records: FeedRecord[];
-  dogId: string;
+  petId: string;
 }) {
   return (
     <div className="space-y-2">
@@ -45,7 +45,7 @@ export function FeedRecordList({
           </div>
           <DeleteButton
             onDelete={async () => {
-              await deleteFeedRecord(record.id, dogId);
+              await deleteFeedRecord(record.id, petId);
             }}
           />
         </div>

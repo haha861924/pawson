@@ -15,8 +15,9 @@ export const inviteMemberSchema = z.object({
   email: z.string().email("請輸入有效電子郵件"),
 });
 
-export const dogSchema = z.object({
+export const petSchema = z.object({
   name: z.string().min(1, "請輸入名字"),
+  species: z.string().optional(),
   breed: z.string().optional(),
   dob: z.string().optional(),
   weight: z.coerce.number().positive().optional().or(z.literal("")),
@@ -25,6 +26,7 @@ export const dogSchema = z.object({
   chipNumber: z.string().optional(),
   motherChipNumber: z.string().optional(),
 });
+
 
 export const careSchema = z.object({
   type: z.string().min(1, "請選擇類型"),
@@ -67,7 +69,7 @@ export const feedReviewSchema = z.object({
 });
 
 export const expenseSchema = z.object({
-  dogId: z.string().min(1, "請選擇狗狗"),
+  petId: z.string().min(1, "請選擇寵物"),
   category: z.string().min(1, "請選擇類別"),
   amount: z.coerce.number().positive("請輸入有效金額"),
   description: z.string().min(1, "請輸入說明"),

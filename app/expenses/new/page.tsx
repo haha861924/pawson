@@ -1,12 +1,12 @@
 import { createExpense } from "@/lib/actions/expenses";
-import { getDogs } from "@/lib/actions/dogs";
+import { getPets } from "@/lib/actions/pets";
 import { ExpenseForm } from "@/components/expenses/ExpenseForm";
 import { PageHeader } from "@/components/shared/PageHeader";
 
 export const dynamic = 'force-dynamic';
 
 export default async function NewExpensePage() {
-  const dogs = await getDogs();
+  const pets = await getPets();
 
   return (
     <div>
@@ -14,7 +14,7 @@ export default async function NewExpensePage() {
       <ExpenseForm
         action={createExpense}
         cancelHref="/expenses"
-        dogs={dogs}
+        dogs={pets}
         referer="/expenses"
       />
     </div>

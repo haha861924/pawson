@@ -6,27 +6,27 @@ import { prisma } from "@/lib/prisma";
 import { dailyHealthLogSchema } from "@/lib/validations";
 import { getRequiredSession, assertCanEdit } from "@/lib/auth-utils";
 
-export async function getDailyHealthLogs(dogId: string) {
+export async function getDailyHealthLogs(petId: string) {
   return prisma.dailyHealthLog.findMany({
-    where: { dogId },
+    where: { petId },
     orderBy: { date: "desc" },
   });
 }
 
-export async function getWeightRecords(dogId: string) {
+export async function getWeightRecords(petId: string) {
   return prisma.weightRecord.findMany({
-    where: { dogId },
+    where: { petId },
     orderBy: { date: "asc" },
   });
 }
 
 export async function createDailyHealthLog(
-  dogId: string,
+  petId: string,
   _prev: unknown,
   formData: FormData
 ): Promise<{ error?: Record<string, string[]> } | void> {
   const session = await getRequiredSession();
-  await assertCanEdit(session.user.id, dogId);
+  await assertCanEdit(session.user.id, petId);
 
   const raw = Object.fromEntries(formData);
   const parsed = dailyHealthLogSchema.safeParse(raw);
@@ -39,7 +39,7 @@ export async function createDailyHealthLog(
 
   await prisma.dailyHealthLog.create({
     data: {
-      dogId,
+      petId,
       date: new Date(date),
       weight: weight || null,
       appetite: appetite || null,
@@ -51,14 +51,14 @@ export async function createDailyHealthLog(
     },
   });
 
-  revalidatePath(`/dogs/${dogId}/diary`);
-  redirect(`/dogs/${dogId}/diary`);
+  revalidatePath(`/pets/${petId}/diary`);
+  redirect(`/pets/${petId}/diary`);
 }
 
-export async function deleteDailyHealthLog(id: string, dogId: string) {
+export async function deleteDailyHealthLog(id: string, petId: string) {
   const session = await getRequiredSession();
-  await assertCanEdit(session.user.id, dogId);
+  await assertCanEdit(session.user.id, petId);
 
   await prisma.dailyHealthLog.delete({ where: { id } });
-  revalidatePath(`/dogs/${dogId}/diary`);
+  revalidatePath(`/pets/${petId}/diary`);
 }

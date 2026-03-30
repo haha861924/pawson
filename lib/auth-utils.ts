@@ -8,16 +8,16 @@ export async function getRequiredSession() {
   return session;
 }
 
-export async function assertCanEdit(userId: string, dogId: string) {
-  const member = await prisma.dogMember.findUnique({
-    where: { dogId_userId: { dogId, userId } },
+export async function assertCanEdit(userId: string, petId: string) {
+  const member = await prisma.petMember.findUnique({
+    where: { petId_userId: { petId, userId } },
   });
   if (!member?.canEdit) throw new Error("Permission denied");
 }
 
-export async function assertOwner(userId: string, dogId: string) {
-  const member = await prisma.dogMember.findUnique({
-    where: { dogId_userId: { dogId, userId } },
+export async function assertOwner(userId: string, petId: string) {
+  const member = await prisma.petMember.findUnique({
+    where: { petId_userId: { petId, userId } },
   });
   if (member?.role !== "OWNER") throw new Error("Owner only");
 }

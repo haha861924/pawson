@@ -6,20 +6,20 @@ import { prisma } from "@/lib/prisma";
 import { careSchema } from "@/lib/validations";
 import { getRequiredSession, assertCanEdit } from "@/lib/auth-utils";
 
-export async function getCareRecordsByDog(dogId: string) {
+export async function getCareRecords(petId: string) {
   return prisma.careRecord.findMany({
-    where: { dogId },
+    where: { petId },
     orderBy: { date: "desc" },
   });
 }
 
 export async function createCareRecord(
-  dogId: string,
+  petId: string,
   _prev: unknown,
   formData: FormData
 ): Promise<{ error?: Record<string, string[]> } | void> {
   const session = await getRequiredSession();
-  await assertCanEdit(session.user.id, dogId);
+  await assertCanEdit(session.user.id, petId);
   const raw = Object.fromEntries(formData);
   const parsed = careSchema.safeParse(raw);
   if (!parsed.success) {
@@ -28,20 +28,20 @@ export async function createCareRecord(
   const { type, date, durationMins, notes } = parsed.data;
   await prisma.careRecord.create({
     data: {
-      dogId,
+      petId,
       type,
       date: new Date(date),
       durationMins: durationMins ? Number(durationMins) : null,
       notes: notes || null,
     },
   });
-  revalidatePath(`/dogs/${dogId}/care`);
-  redirect(`/dogs/${dogId}/care`);
+  revalidatePath(`/pets/${petId}/care`);
+  redirect(`/pets/${petId}/care`);
 }
 
-export async function deleteCareRecord(id: string, dogId: string) {
+export async function deleteCareRecord(id: string, petId: string) {
   const session = await getRequiredSession();
-  await assertCanEdit(session.user.id, dogId);
+  await assertCanEdit(session.user.id, petId);
   await prisma.careRecord.delete({ where: { id } });
-  revalidatePath(`/dogs/${dogId}/care`);
+  revalidatePath(`/pets/${petId}/care`);
 }

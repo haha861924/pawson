@@ -33,10 +33,10 @@ function StarRating({ rating }: { rating: number }) {
 
 export function FeedReviewList({
   reviews,
-  dogId,
+  petId,
 }: {
   reviews: FeedReview[];
-  dogId: string;
+  petId: string;
 }) {
   return (
     <div className="space-y-2">
@@ -59,7 +59,7 @@ export function FeedReviewList({
           </div>
           <DeleteButton
             onDelete={async () => {
-              await deleteFeedReview(review.id, dogId);
+              await deleteFeedReview(review.id, petId);
             }}
           />
         </div>

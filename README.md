@@ -1,6 +1,6 @@
 # Pawson 🐾
 
-寵物犬隻管理系統 — 多人共養、追蹤狗狗的照護、餵食、健康與花費紀錄。
+多物種寵物管理系統 — 多人共養、追蹤寵物的照護、餵食、健康與花費紀錄。
 
 ## 技術棧
 
@@ -72,12 +72,12 @@ npx prisma studio                      # 資料庫 GUI
 
 **資料流：** 全部讀取在 async Server Components 直接呼叫 Prisma，寫入使用 Server Actions，不使用 API Routes（除了檔案上傳）。
 
-**表單模式：** 所有表單使用 `useActionState(action, undefined)` + `FormData`，Server Action 簽名為 `(prev: unknown, formData: FormData)`。需要閉包（如 dogId）時，在 page 檔案包裝：
+**表單模式：** 所有表單使用 `useActionState(action, undefined)` + `FormData`，Server Action 簽名為 `(prev: unknown, formData: FormData)`。需要閉包（如 petId）時，在 page 檔案包裝：
 
 ```ts
 async function action(_prev: unknown, fd: FormData) {
   "use server";
-  return createCareRecord(dogId, _prev, fd);
+  return createCareRecord(petId, _prev, fd);
 }
 ```
 
@@ -102,10 +102,10 @@ async function action(_prev: unknown, fd: FormData) {
 ### 認證與權限
 
 - 使用 NextAuth v5（credentials + Google OAuth）
-- 路由 `/dogs/*`、`/expenses/*` 需登入（Middleware 守衛）
-- 每隻狗狗透過 `DogMember` 關聯使用者，角色分為 `OWNER`（飼主）/ `CARETAKER`（共同扶養）
+- 路由 `/pets/*`、`/expenses/*` 需登入（Middleware 守衛）
+- 每隻寵物透過 `PetMember` 關聯使用者，角色分為 `OWNER`（飼主）/ `CARETAKER`（共同扶養）
 - 權限欄位：`canView`（預設 true）、`canEdit`（預設 false，OWNER 為 true）
-- Server Action 權限檢查工具：`assertCanEdit(userId, dogId)`、`assertOwner(userId, dogId)`
+- Server Action 權限檢查工具：`assertCanEdit(userId, petId)`、`assertOwner(userId, petId)`
 - **邀請限制**：邀請成員透過電子郵件查詢已註冊帳號（`prisma.user.findUnique({ where: { email } })`）；若對方尚未在 Pawson 建立帳號，系統回傳錯誤「找不到此電子郵件的使用者」
 
 ### 資料庫規則
@@ -120,16 +120,16 @@ async function action(_prev: unknown, fd: FormData) {
 /                          首頁 dashboard
 /auth/login                登入
 /auth/register             註冊
-/dogs                      犬隻列表
-/dogs/new                  新增狗狗
-/dogs/[dogId]              狗狗總覽
-/dogs/[dogId]/edit         編輯狗狗
-/dogs/[dogId]/care         照護記錄
-/dogs/[dogId]/feeding      飼料管理 + 飼料評論
-/dogs/[dogId]/health       健康照護 + 用藥提醒
-/dogs/[dogId]/diary        成長曲線（健康日記 + 體重追蹤）
-/dogs/[dogId]/expenses     單狗花費
-/dogs/[dogId]/members      成員管理（飼主限定）
+/pets                      寵物列表
+/pets/new                  新增寵物
+/pets/[petId]              寵物總覽
+/pets/[petId]/edit         編輯寵物
+/pets/[petId]/care         照護記錄
+/pets/[petId]/feeding      飼料管理 + 飼料評論
+/pets/[petId]/health       健康照護 + 用藥提醒
+/pets/[petId]/weight       成長曲線（體重追蹤 + 圖表）
+/pets/[petId]/expenses     單一寵物花費
+/pets/[petId]/members      成員管理（飼主限定）
 /expenses                  全部花費統計（含篩選與圖表）
 ```
 
@@ -160,7 +160,7 @@ async function action(_prev: unknown, fd: FormData) {
 
 ### 飼料評論
 
-每隻狗狗可針對吃過的飼料留下星等評分（1–5 顆星）與文字評論。資料存於 `FeedReview` model，整合於飼料管理頁下方。
+每隻寵物可針對吃過的飼料留下星等評分（1–5 顆星）與文字評論。資料存於 `FeedReview` model，整合於飼料管理頁下方。
 
 ### 用藥提醒週期
 
@@ -173,24 +173,24 @@ async function action(_prev: unknown, fd: FormData) {
 - 圓餅圖：各類別花費比例
 - 長條圖：近六個月花費趨勢
 
-全域花費頁 `/expenses` 支援依狗狗、品種、類別篩選。
+全域花費頁 `/expenses` 支援依寵物、品種、類別篩選。
 
 ### 測試
 
 **測試狀態：**
 
-- ✅ 單元測試：68/68 通過（覆蓋 validations、actions、components）
-- ✅ E2E 測試：34 個測試（7 個測試檔案）
+- ✅ 單元測試：70/70 通過（覆蓋 validations、actions、components）
+- ✅ E2E 測試：30 個測試（7 個測試檔案）
 - ✅ Build：正式建置通過
 
 ```bash
 # 單元測試（Vitest）
-npx vitest run                # 執行所有單元測試（68 tests）
+npx vitest run                # 執行所有單元測試
 npx vitest --coverage         # 執行並產生覆蓋率報告
 
 # E2E 測試（Playwright）— 需先啟動開發伺服器
 npm run dev &
-npx playwright test           # 執行所有 E2E 測試（34 tests）
+npx playwright test           # 執行所有 E2E 測試
 npx playwright test --ui      # 互動式 UI 模式（推薦用於開發/除錯）
 npx playwright show-report    # 開啟測試報告（http://localhost:9323）
 
@@ -221,11 +221,11 @@ E2E_EMAIL=your@email.com E2E_PASSWORD=YourPassword npx playwright test
 
 #### 測試涵蓋範圍
 
-- ✅ 犬隻管理（CRUD + 成員邀請）
+- ✅ 寵物管理（CRUD + 成員邀請）
 - ✅ 日常照護記錄
 - ✅ 飼料管理（計畫、記錄、評論）
 - ✅ 健康照護（用藥提醒）
-- ✅ 成長曲線（每日健康記錄 + 體重追蹤）
+- ✅ 成長曲線（體重追蹤）
 - ✅ 花費記錄與統計
 - ✅ 單元測試（驗證、型別、元件）
 
@@ -236,12 +236,12 @@ E2E_EMAIL=your@email.com E2E_PASSWORD=YourPassword npx playwright test
 | 功能                                | 路徑                     |
 | ----------------------------------- | ------------------------ |
 | 會員登入（email/密碼 + Google）     | `/auth/login`            |
-| 犬隻管理（含大頭貼、晶片號碼）      | `/dogs`                  |
-| 成員管理（邀請、權限、移除）        | `/dogs/[dogId]/members`  |
-| 日常照護記錄                        | `/dogs/[dogId]/care`     |
-| 飼料管理 + 餵食記錄                 | `/dogs/[dogId]/feeding`  |
-| 飼料評論（星等+文字）               | `/dogs/[dogId]/feeding`  |
-| 健康照護 + 用藥提醒                 | `/dogs/[dogId]/health`   |
-| 成長曲線（每日健康記錄 + 體重追蹤） | `/dogs/[dogId]/diary`    |
-| 花費記錄 + 統一發票                 | `/dogs/[dogId]/expenses` |
+| 寵物管理（含大頭貼、晶片號碼）      | `/pets`                  |
+| 成員管理（邀請、權限、移除）        | `/pets/[petId]/members`  |
+| 日常照護記錄                        | `/pets/[petId]/care`     |
+| 飼料管理 + 餵食記錄                 | `/pets/[petId]/feeding`  |
+| 飼料評論（星等+文字）               | `/pets/[petId]/feeding`  |
+| 健康照護 + 用藥提醒                 | `/pets/[petId]/health`   |
+| 成長曲線（體重追蹤 + 圖表）         | `/pets/[petId]/weight`   |
+| 花費記錄 + 統一發票                 | `/pets/[petId]/expenses` |
 | 全部花費統計 + 圖表                 | `/expenses`              |

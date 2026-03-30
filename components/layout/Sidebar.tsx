@@ -8,7 +8,7 @@ import { logoutUser } from "@/lib/actions/auth";
 
 const navItems = [
   { href: "/", label: "儀表板", icon: LayoutDashboard },
-  { href: "/dogs", label: "犬隻管理", icon: PawPrint },
+  { href: "/pets", label: "寵物管理", icon: PawPrint },
   { href: "/expenses", label: "花費統計", icon: DollarSign },
 ];
 

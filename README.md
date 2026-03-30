@@ -245,3 +245,5 @@ E2E_EMAIL=your@email.com E2E_PASSWORD=YourPassword npx playwright test
 | 成長曲線（體重追蹤 + 圖表）         | `/pets/[petId]/weight`   |
 | 花費記錄 + 統一發票                 | `/pets/[petId]/expenses` |
 | 全部花費統計 + 圖表                 | `/expenses`              |
+| Google Analytics 流量分析            | 自動整合（GA4）          |
+| 回應式設計（RWD）                        | 全局支援手機 / 平板 / 框架 |

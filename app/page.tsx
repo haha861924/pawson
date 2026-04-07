@@ -7,7 +7,7 @@ import { getPets } from "@/lib/actions/pets";
 import { getUpcomingHealthDue } from "@/lib/actions/health";
 import { getRequiredSession } from "@/lib/auth-utils";
 import { getExpenseSummary, getExpenses } from "@/lib/actions/expenses";
-import { HealthTypeBadge } from "@/components/health/HealthTypeBadge";
+import { HealthDueCount, HealthDueList } from "@/components/health/HealthDueCard";
 
 export const dynamic = 'force-dynamic';
 
@@ -15,7 +15,7 @@ export default async function DashboardPage() {
   const session = await getRequiredSession();
   const [pets, upcomingHealth, summary, recentExpenses] = await Promise.all([
     getPets(),
-    getUpcomingHealthDue(session.user.id, 30),
+    getUpcomingHealthDue(session.user.id, 180),
     getExpenseSummary(),
     getExpenses(),
   ]);
@@ -38,12 +38,7 @@ export default async function DashboardPage() {
             <p className="text-sm text-muted-foreground">隻寵物</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <p className="text-3xl font-bold text-destructive">{upcomingHealth.length}</p>
-            <p className="text-sm text-muted-foreground">健康待辦</p>
-          </CardContent>
-        </Card>
+        <HealthDueCount items={upcomingHealth} />
         <Card className="col-span-2">
           <CardContent className="pt-4">
             <p className="text-3xl font-bold">NT$ {summary.total.toLocaleString()}</p>
@@ -53,37 +48,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base">即將到期健康記錄</CardTitle>
-              <span className="text-xs text-muted-foreground">未來 30 天</span>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {upcomingHealth.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">暫無待辦</p>
-            ) : (
-              <div className="space-y-2">
-                {upcomingHealth.slice(0, 5).map((h: (typeof upcomingHealth)[number]) => (
-                  <Link
-                    key={h.id}
-                    href={`/pets/${h.petId}/health`}
-                    className="flex items-center gap-2 text-sm hover:opacity-70"
-                  >
-                    <HealthTypeBadge type={h.type} />
-                    <span className="flex-1 truncate">
-                      {h.pet.name} · {h.title}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {h.nextDueDate && format(new Date(h.nextDueDate), "MM/dd")}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <HealthDueList items={upcomingHealth} />
 
         <Card>
           <CardHeader className="pb-2">

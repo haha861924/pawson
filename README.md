@@ -129,7 +129,8 @@ async function action(_prev: unknown, fd: FormData) {
 /pets/[petId]/feeding/reviews      飼料評論列表（CRUD）
 /pets/[petId]/feeding/reviews/new  新增飼料評論
 /pets/[petId]/feeding/reviews/[reviewId]/edit  編輯飼料評論
-/pets/[petId]/health               健康照護 + 用藥提醒
+/pets/[petId]/health               健康照護 + 用藥提醒（CRUD + 編輯）
+/pets/[petId]/health/[recordId]/edit  編輯健康記錄
 /pets/[petId]/weight               成長曲線（體重追蹤 + 圖表）
 /pets/[petId]/diary                成長日誌（日曆視圖 + 體重趨勢圖 + 每日健康記錄）
 /pets/[petId]/expenses             單一寵物花費
@@ -183,9 +184,13 @@ async function action(_prev: unknown, fd: FormData) {
 
 資料模型：`Discussion`（文章）+ `DiscussionComment`（留言），均關聯至 `User`。
 
-### 用藥提醒週期
+### 用藥提醒與健康待辦
 
 健康記錄支援設定提醒週期（每月、每三個月、每半年、每年）。儲存後系統自動從記錄日期計算 `nextDueDate`，Dashboard 和健康列表會顯示逾期/即將到期提示。
+
+**儀表板健康待辦**支援三種時間範圍篩選（7 天 / 30 天 / 半年），待辦計數隨篩選連動。即使未設定提醒週期，只要健康記錄的日期在未來且即將到期，也會自動出現在儀表板待辦中。
+
+健康記錄支援完整 CRUD：新增、查看、**編輯**、刪除。
 
 ### 花費圖表
 
@@ -287,7 +292,7 @@ E2E_EMAIL=your@email.com E2E_PASSWORD=YourPassword npx playwright test
 | 日常照護記錄                        | `/pets/[petId]/care`     |
 | 飼料管理 + 餵食記錄                 | `/pets/[petId]/feeding`  |
 | 飼料評論（星等+文字，完整 CRUD）    | `/pets/[petId]/feeding/reviews`  |
-| 健康照護 + 用藥提醒                 | `/pets/[petId]/health`   |
+| 健康照護 + 用藥提醒（CRUD）          | `/pets/[petId]/health`   |
 | 成長曲線（體重追蹤 + 圖表）         | `/pets/[petId]/weight`   |
 | 成長日誌（日曆視圖 + 每日健康記錄） | `/pets/[petId]/diary`    |
 | 花費記錄 + 統一發票                 | `/pets/[petId]/expenses` |

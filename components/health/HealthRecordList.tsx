@@ -3,11 +3,13 @@
 import { format, isPast, differenceInDays } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { HealthTypeBadge } from "./HealthTypeBadge";
+import Link from "next/link";
 import { DeleteButton } from "@/components/shared/DeleteButton";
 import { deleteHealthRecord } from "@/lib/actions/health";
 import { REMINDER_INTERVALS, getLabel } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { Bell } from "lucide-react";
+import { buttonVariants } from "@/lib/button-variants";
+import { Bell, Pencil } from "lucide-react";
 
 interface HealthRecord {
   id: string;
@@ -68,11 +70,19 @@ export function HealthRecordList({
                   </p>
                 )}
               </div>
-              <DeleteButton
-                onDelete={async () => {
-                  await deleteHealthRecord(record.id, petId);
-                }}
-              />
+              <div className="flex items-center gap-1">
+                <Link
+                  href={`/pets/${petId}/health/${record.id}/edit`}
+                  className={cn(buttonVariants({ variant: "ghost", size: "icon-xs" }))}
+                >
+                  <Pencil className="h-3 w-3" />
+                </Link>
+                <DeleteButton
+                  onDelete={async () => {
+                    await deleteHealthRecord(record.id, petId);
+                  }}
+                />
+              </div>
             </div>
           </div>
         );

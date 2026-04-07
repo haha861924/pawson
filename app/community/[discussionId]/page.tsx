@@ -83,15 +83,25 @@ export default async function DiscussionDetailPage({
           )}
         </div>
 
-        {discussion.imageUrl && (
-          <div className="relative w-full max-h-96 overflow-hidden rounded-lg">
-            <Image
-              src={discussion.imageUrl}
-              alt={discussion.title}
-              width={800}
-              height={400}
-              className="object-cover w-full"
-            />
+        {discussion.imageUrls.length > 0 && (
+          <div className={`grid gap-2 ${discussion.imageUrls.length === 1 ? "" : "grid-cols-2"}`}>
+            {discussion.imageUrls.map((url: string, i: number) => {
+              const isVid = /\.(mp4|webm|mov)$/i.test(url);
+              return (
+                <div key={i} className="relative w-full aspect-video overflow-hidden rounded-lg">
+                  {isVid ? (
+                    <video src={url} controls className="w-full h-full object-cover" />
+                  ) : (
+                    <Image
+                      src={url}
+                      alt={`${discussion.title} - 圖片 ${i + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 

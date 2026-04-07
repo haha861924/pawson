@@ -87,25 +87,26 @@ describe("discussionSchema", () => {
     expect(result.error?.flatten().fieldErrors.category).toBeDefined();
   });
 
-  it("imageUrl is optional", () => {
+  it("imageUrls is optional", () => {
     const result = discussionSchema.safeParse({
       title: "標題",
       content: "內容",
       category: "medication",
     });
     expect(result.success).toBe(true);
-    expect(result.data?.imageUrl).toBeUndefined();
+    expect(result.data?.imageUrls).toBeUndefined();
   });
 
-  it("accepts imageUrl", () => {
+  it("accepts imageUrls as JSON string", () => {
+    const urls = JSON.stringify(["https://example.com/1.jpg", "https://example.com/2.jpg"]);
     const result = discussionSchema.safeParse({
       title: "標題",
       content: "內容",
       category: "supplement",
-      imageUrl: "https://example.com/image.jpg",
+      imageUrls: urls,
     });
     expect(result.success).toBe(true);
-    expect(result.data?.imageUrl).toBe("https://example.com/image.jpg");
+    expect(result.data?.imageUrls).toBe(urls);
   });
 });
 

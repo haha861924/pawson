@@ -31,7 +31,7 @@ export default async function EditDiscussionPage({
             title: discussion.title,
             content: discussion.content,
             category: discussion.category,
-            imageUrl: discussion.imageUrl,
+            imageUrls: discussion.imageUrls,
           }}
         />
       </div>

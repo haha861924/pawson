@@ -8,7 +8,7 @@ interface DiscussionItem {
   title: string;
   content: string;
   category: string;
-  imageUrl: string | null;
+  imageUrls: string[];
   createdAt: Date;
   author: { id: string; name: string | null; image: string | null };
   _count: { comments: number };

@@ -3,8 +3,11 @@ import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { StorageClient } from "@supabase/storage-js";
 
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const ALLOWED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
+const ALLOWED_TYPES = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES];
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
 
 async function uploadToSupabase(buffer: Buffer, filename: string, contentType: string): Promise<string> {
   const supabaseUrl = process.env.SUPABASE_URL!;
@@ -35,15 +38,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "未提供檔案" }, { status: 400 });
   }
   if (!ALLOWED_TYPES.includes(file.type)) {
-    return NextResponse.json({ error: "僅支援 JPEG、PNG、WebP、GIF 格式" }, { status: 400 });
+    return NextResponse.json({ error: "僅支援 JPEG、PNG、WebP、GIF、MP4、WebM、MOV 格式" }, { status: 400 });
   }
-  if (file.size > MAX_SIZE) {
-    return NextResponse.json({ error: "檔案大小不得超過 5MB" }, { status: 400 });
+  const isVideo = ALLOWED_VIDEO_TYPES.includes(file.type);
+  const maxSize = isVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE;
+  if (file.size > maxSize) {
+    return NextResponse.json({ error: isVideo ? "影片大小不得超過 50MB" : "圖片大小不得超過 5MB" }, { status: 400 });
   }
 
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
-  const ext = file.type.split("/")[1].replace("jpeg", "jpg");
+  const extMap: Record<string, string> = { jpeg: "jpg", quicktime: "mov" };
+  const rawExt = file.type.split("/")[1];
+  const ext = extMap[rawExt] ?? rawExt;
   const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
   try {
@@ -53,7 +60,8 @@ export async function POST(request: NextRequest) {
       : await uploadToLocal(buffer, filename);
     return NextResponse.json({ url });
   } catch (err) {
-    console.error("Upload error:", err);
-    return NextResponse.json({ error: "上傳失敗，請稍後再試" }, { status: 500 });
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("Upload error:", message, err);
+    return NextResponse.json({ error: `上傳失敗：${message}` }, { status: 500 });
   }
 }

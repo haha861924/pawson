@@ -91,7 +91,7 @@ export const discussionSchema = z.object({
   title: z.string().min(1, "請輸入標題"),
   content: z.string().min(1, "請輸入內容"),
   category: z.string().min(1, "請選擇分類"),
-  imageUrl: z.string().optional(),
+  imageUrls: z.string().optional(), // JSON string of URL array
 });
 
 export const discussionCommentSchema = z.object({

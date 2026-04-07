@@ -55,14 +55,15 @@ export async function createDiscussion(
   if (!parsed.success) {
     return { error: parsed.error.flatten().fieldErrors };
   }
-  const { title, content, category, imageUrl } = parsed.data;
+  const { title, content, category, imageUrls } = parsed.data;
+  const urls: string[] = imageUrls ? JSON.parse(imageUrls) : [];
   const discussion = await prisma.discussion.create({
     data: {
       authorId: session.user.id,
       title,
       content,
       category,
-      imageUrl: imageUrl || null,
+      imageUrls: urls,
     },
   });
   revalidatePath("/community");
@@ -84,14 +85,15 @@ export async function updateDiscussion(
   if (!parsed.success) {
     return { error: parsed.error.flatten().fieldErrors };
   }
-  const { title, content, category, imageUrl } = parsed.data;
+  const { title, content, category, imageUrls } = parsed.data;
+  const urls: string[] = imageUrls ? JSON.parse(imageUrls) : [];
   await prisma.discussion.update({
     where: { id },
     data: {
       title,
       content,
       category,
-      imageUrl: imageUrl || null,
+      imageUrls: urls,
     },
   });
   revalidatePath("/community");

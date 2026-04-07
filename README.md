@@ -156,12 +156,15 @@ async function action(_prev: unknown, fd: FormData) {
 
 使用 `components/shared/DeleteButton.tsx`（含 AlertDialog 確認）。傳入 `onDelete` async 函數即可。
 
-### 圖片上傳
+### 檔案上傳
 
-- API Route：`POST /api/upload`（最大 5MB，支援 JPG/PNG/WebP/GIF）
+- API Route：`POST /api/upload`
+- **圖片**：JPEG、PNG、WebP、GIF（最大 5MB）
+- **影片**：MP4、WebM、MOV（最大 50MB）
 - 上傳後回傳 `{ url: string }`
 - **本機**（未設定 Supabase Storage 環境變數）：存至 `public/uploads/`
 - **Production**：上傳至 Supabase Storage bucket `pawson-uploads`，回傳公開 URL
+- 討論區文章支援上傳最多 5 個圖片/影片，含即時進度條
 
 ### 統一發票
 
@@ -175,14 +178,14 @@ async function action(_prev: unknown, fd: FormData) {
 
 註冊用戶可在 `/community` 共同討論飼料、用藥、鮮食、保健品等主題。功能包含：
 
-- **文章發佈**：支援標題、內容、分類（飼料/用藥/鮮食/保健品）與圖片網址
+- **文章發佈**：支援標題、內容、分類（飼料/用藥/鮮食/保健品）與圖片/影片上傳（最多 5 個，含進度條）
 - **留言區**：每篇文章下方可留言互動，作者可刪除自己的留言
 - **分類篩選**：快速篩選特定分類的討論
 - **搜尋功能**：依標題與內容關鍵字搜尋
 - **權限控制**：僅作者可編輯或刪除自己的文章與留言
 - **RWD 響應式**：桌面側邊欄與手機底部導覽列皆有入口
 
-資料模型：`Discussion`（文章）+ `DiscussionComment`（留言），均關聯至 `User`。
+資料模型：`Discussion`（文章，含 `imageUrls` 陣列欄位）+ `DiscussionComment`（留言），均關聯至 `User`。圖片透過 `/api/upload` 上傳後儲存 URL 至資料庫。
 
 ### 用藥提醒與健康待辦
 

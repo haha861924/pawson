@@ -19,6 +19,8 @@ model User {
   accounts       Account[]
   sessions       Session[]
   petMemberships PetMember[]
+  discussions    Discussion[]
+  discussionComments DiscussionComment[]
 }
 
 model Account {
@@ -218,5 +220,35 @@ model DailyHealthLog {
 
   @@unique([petId, date])
   @@index([petId, date])
+}
+
+model Discussion {
+  id        String   @id @default(cuid())
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  title     String
+  content   String
+  category  String   // "feed" | "medication" | "fresh_food" | "supplement"
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  comments DiscussionComment[]
+
+  @@index([category])
+  @@index([authorId])
+}
+
+model DiscussionComment {
+  id           String     @id @default(cuid())
+  discussionId String
+  discussion   Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  authorId     String
+  author       User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content      String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([discussionId])
 }
 

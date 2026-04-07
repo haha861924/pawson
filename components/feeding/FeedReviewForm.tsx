@@ -13,12 +13,18 @@ type ActionResult = { error?: Record<string, string[]> } | void;
 interface FeedReviewFormProps {
   action: (prev: unknown, formData: FormData) => Promise<ActionResult>;
   defaultFoodName?: string;
+  defaultValues?: {
+    foodName: string;
+    brand: string | null;
+    rating: number;
+    review: string | null;
+  };
 }
 
-export function FeedReviewForm({ action, defaultFoodName }: FeedReviewFormProps) {
+export function FeedReviewForm({ action, defaultFoodName, defaultValues }: FeedReviewFormProps) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const errors = (state as { error?: Record<string, string[]> })?.error ?? {};
-  const [rating, setRating] = useState(0);
+  const [rating, setRating] = useState(defaultValues?.rating ?? 0);
   const [hovered, setHovered] = useState(0);
 
   return (
@@ -29,7 +35,7 @@ export function FeedReviewForm({ action, defaultFoodName }: FeedReviewFormProps)
           <Input
             id="foodName"
             name="foodName"
-            defaultValue={defaultFoodName ?? ""}
+            defaultValue={defaultValues?.foodName ?? defaultFoodName ?? ""}
             required
           />
           {errors.foodName && (
@@ -38,7 +44,7 @@ export function FeedReviewForm({ action, defaultFoodName }: FeedReviewFormProps)
         </div>
         <div className="space-y-1">
           <Label htmlFor="brand">品牌</Label>
-          <Input id="brand" name="brand" />
+          <Input id="brand" name="brand" defaultValue={defaultValues?.brand ?? ""} />
         </div>
       </div>
 
@@ -71,11 +77,17 @@ export function FeedReviewForm({ action, defaultFoodName }: FeedReviewFormProps)
 
       <div className="space-y-1">
         <Label htmlFor="review">評論</Label>
-        <Textarea id="review" name="review" rows={2} placeholder="狗狗喜歡嗎？有什麼特別之處？" />
+        <Textarea
+          id="review"
+          name="review"
+          rows={2}
+          placeholder="寵物喜歡嗎？有什麼特別之處？"
+          defaultValue={defaultValues?.review ?? ""}
+        />
       </div>
 
       <Button type="submit" size="sm" disabled={pending || rating === 0}>
-        {pending ? "儲存中..." : "送出評論"}
+        {pending ? "儲存中..." : defaultValues ? "更新評論" : "送出評論"}
       </Button>
     </form>
   );

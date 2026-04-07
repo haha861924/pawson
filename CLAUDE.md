@@ -48,8 +48,10 @@ npx prisma studio                      # Open database browser GUI
 
 ## Feature areas
 
-- **犬隻管理** `/dogs` — CRUD for dog profiles
-- **日常照護** `/dogs/[dogId]/care` — walk, bath, grooming, play, training logs
-- **飼料管理** `/dogs/[dogId]/feeding` — active feed plan + meal records
-- **健康照護** `/dogs/[dogId]/health` — vet visits, vaccines, medications with next-due-date tracking
-- **花費記錄** `/dogs/[dogId]/expenses` — per-dog; `/expenses` — all dogs aggregated with category breakdown
+- **寵物管理** `/pets` — CRUD for pet profiles
+- **日常照護** `/pets/[petId]/care` — walk, bath, grooming, play, training logs
+- **飼料管理** `/pets/[petId]/feeding` — active feed plan + meal records
+- **飼料評論** `/pets/[petId]/feeding/reviews` — CRUD for star-rated feed reviews (dedicated page)
+- **健康照護** `/pets/[petId]/health` — vet visits, vaccines, medications with next-due-date tracking
+- **花費記錄** `/pets/[petId]/expenses` — per-pet; `/expenses` — all pets aggregated with category breakdown
+- **共同討論區** `/community` — thread-based forum for feed/medication/fresh food/supplement discussions with comments, search, and category filtering

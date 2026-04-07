@@ -1,14 +1,15 @@
+import Link from "next/link";
 import { getActiveFeedPlan, getFeedRecords } from "@/lib/actions/feeding";
-import { getFeedReviews, createFeedReview } from "@/lib/actions/feedReviews";
+import { getFeedReviews } from "@/lib/actions/feedReviews";
 import { FeedPlanCard } from "@/components/feeding/FeedPlanCard";
 import { FeedRecordList } from "@/components/feeding/FeedRecordList";
-import { FeedReviewForm } from "@/components/feeding/FeedReviewForm";
-import { FeedReviewList } from "@/components/feeding/FeedReviewList";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Separator } from "@/components/ui/separator";
+import { buttonVariants } from "@/lib/button-variants";
+import { Star, ChevronRight } from "lucide-react";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function FeedingPage({
   params,
@@ -22,10 +23,10 @@ export default async function FeedingPage({
     getFeedReviews(petId),
   ]);
 
-  async function reviewAction(_prev: unknown, formData: FormData) {
-    "use server";
-    return createFeedReview(petId, _prev, formData);
-  }
+  const avgRating =
+    feedReviews.length > 0
+      ? feedReviews.reduce((sum, r) => sum + r.rating, 0) / feedReviews.length
+      : 0;
 
   return (
     <div className="space-y-6">
@@ -49,18 +50,25 @@ export default async function FeedingPage({
 
       <Separator />
 
-      <div>
-        <h3 className="font-semibold mb-3">飼料評論</h3>
-        <div className="space-y-4">
-          <FeedReviewForm
-            action={reviewAction}
-            defaultFoodName={feedPlan?.foodName}
-          />
-          {feedReviews.length > 0 && (
-            <FeedReviewList reviews={feedReviews} petId={petId} />
-          )}
+      <Link
+        href={`/pets/${petId}/feeding/reviews`}
+        className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors group"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-yellow-100 text-yellow-600">
+            <Star className="h-5 w-5 fill-current" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-sm">飼料評論</h3>
+            <p className="text-xs text-muted-foreground">
+              {feedReviews.length > 0
+                ? `${feedReviews.length} 則評論・平均 ${avgRating.toFixed(1)} 星`
+                : "尚無評論，立即分享心得"}
+            </p>
+          </div>
         </div>
-      </div>
+        <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+      </Link>
     </div>
   );
 }

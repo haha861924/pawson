@@ -125,13 +125,20 @@ async function action(_prev: unknown, fd: FormData) {
 /pets/[petId]              寵物總覽
 /pets/[petId]/edit         編輯寵物
 /pets/[petId]/care         照護記錄
-/pets/[petId]/feeding      飼料管理 + 飼料評論
-/pets/[petId]/health       健康照護 + 用藥提醒
-/pets/[petId]/weight       成長曲線（體重追蹤 + 圖表）
-/pets/[petId]/diary        成長日誌（日曆視圖 + 體重趨勢圖 + 每日健康記錄）
-/pets/[petId]/expenses     單一寵物花費
-/pets/[petId]/members      成員管理（飼主限定）
-/expenses                  全部花費統計（含篩選與圖表）
+/pets/[petId]/feeding              飼料管理
+/pets/[petId]/feeding/reviews      飼料評論列表（CRUD）
+/pets/[petId]/feeding/reviews/new  新增飼料評論
+/pets/[petId]/feeding/reviews/[reviewId]/edit  編輯飼料評論
+/pets/[petId]/health               健康照護 + 用藥提醒
+/pets/[petId]/weight               成長曲線（體重追蹤 + 圖表）
+/pets/[petId]/diary                成長日誌（日曆視圖 + 體重趨勢圖 + 每日健康記錄）
+/pets/[petId]/expenses             單一寵物花費
+/pets/[petId]/members              成員管理（飼主限定）
+/expenses                          全部花費統計（含篩選與圖表）
+/community                         共同討論區（分類篩選 + 搜尋）
+/community/new                     發佈新文章
+/community/[discussionId]          文章詳情 + 留言區
+/community/[discussionId]/edit     編輯文章
 ```
 
 ### 新增功能 Checklist
@@ -161,7 +168,20 @@ async function action(_prev: unknown, fd: FormData) {
 
 ### 飼料評論
 
-每隻寵物可針對吃過的飼料留下星等評分（1–5 顆星）與文字評論。資料存於 `FeedReview` model，整合於飼料管理頁下方。
+每隻寵物可針對吃過的飼料留下星等評分（1–5 顆星）與文字評論。資料存於 `FeedReview` model，擁有獨立的評論列表頁面（`/pets/[petId]/feeding/reviews`），支援完整 CRUD 操作（新增、查看、編輯、刪除）。飼料管理頁面以卡片入口顯示評論統計（則數 + 平均星等），點擊即可進入評論列表。
+
+### 共同討論區
+
+註冊用戶可在 `/community` 共同討論飼料、用藥、鮮食、保健品等主題。功能包含：
+
+- **文章發佈**：支援標題、內容、分類（飼料/用藥/鮮食/保健品）與圖片網址
+- **留言區**：每篇文章下方可留言互動，作者可刪除自己的留言
+- **分類篩選**：快速篩選特定分類的討論
+- **搜尋功能**：依標題與內容關鍵字搜尋
+- **權限控制**：僅作者可編輯或刪除自己的文章與留言
+- **RWD 響應式**：桌面側邊欄與手機底部導覽列皆有入口
+
+資料模型：`Discussion`（文章）+ `DiscussionComment`（留言），均關聯至 `User`。
 
 ### 用藥提醒週期
 
@@ -203,7 +223,7 @@ async function action(_prev: unknown, fd: FormData) {
 **測試狀態：**
 
 - ✅ 單元測試：通過（覆蓋 validations、actions、components）
-- ✅ E2E 測試（7 個測試檔案）
+- ✅ E2E 測試（9 個測試檔案）
 - ✅ Build：正式建置通過
 
 ```bash
@@ -246,11 +266,13 @@ E2E_EMAIL=your@email.com E2E_PASSWORD=YourPassword npx playwright test
 
 - ✅ 寵物管理（CRUD + 成員邀請）
 - ✅ 日常照護記錄
-- ✅ 飼料管理（計畫、記錄、評論）
+- ✅ 飼料管理（計畫、記錄）
+- ✅ 飼料評論 CRUD（新增、查看、編輯、刪除）
 - ✅ 健康照護（用藥提醒）
 - ✅ 成長曲線（體重追蹤）
 - ✅ 成長日誌（每日健康記錄 + 日曆視圖）
 - ✅ 花費記錄與統計
+- ✅ 共同討論區（發佈、留言、編輯、刪除、搜尋、篩選）
 - ✅ 單元測試（驗證、型別、元件）
 
 ---
@@ -264,11 +286,12 @@ E2E_EMAIL=your@email.com E2E_PASSWORD=YourPassword npx playwright test
 | 成員管理（邀請、權限、移除）        | `/pets/[petId]/members`  |
 | 日常照護記錄                        | `/pets/[petId]/care`     |
 | 飼料管理 + 餵食記錄                 | `/pets/[petId]/feeding`  |
-| 飼料評論（星等+文字）               | `/pets/[petId]/feeding`  |
+| 飼料評論（星等+文字，完整 CRUD）    | `/pets/[petId]/feeding/reviews`  |
 | 健康照護 + 用藥提醒                 | `/pets/[petId]/health`   |
 | 成長曲線（體重追蹤 + 圖表）         | `/pets/[petId]/weight`   |
 | 成長日誌（日曆視圖 + 每日健康記錄） | `/pets/[petId]/diary`    |
 | 花費記錄 + 統一發票                 | `/pets/[petId]/expenses` |
 | 全部花費統計 + 圖表                 | `/expenses`              |
 | Google Analytics 流量分析            | 自動整合（GA4）          |
-| 回應式設計（RWD）                        | 全局支援手機 / 平板 / 框架 |
+| 共同討論區（飼料/用藥/鮮食/保健品）  | `/community`             |
+| 回應式設計（RWD）                        | 全局支援手機 / 平板 / 桌面 |

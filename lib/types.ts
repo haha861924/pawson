@@ -78,6 +78,13 @@ export const MOOD_OPTIONS = [
   { value: "lethargic", label: "無精打采" },
 ] as const;
 
+export const DISCUSSION_CATEGORIES = [
+  { value: "feed", label: "飼料" },
+  { value: "medication", label: "用藥" },
+  { value: "fresh_food", label: "鮮食" },
+  { value: "supplement", label: "保健品" },
+] as const;
+
 export function getLabel(
   list: readonly { value: string; label: string }[],
   value: string

@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { format } from "date-fns";
-import { Star } from "lucide-react";
+import { Star, Pencil } from "lucide-react";
 import { DeleteButton } from "@/components/shared/DeleteButton";
 import { deleteFeedReview } from "@/lib/actions/feedReviews";
 import { cn } from "@/lib/utils";
@@ -34,34 +35,55 @@ function StarRating({ rating }: { rating: number }) {
 export function FeedReviewList({
   reviews,
   petId,
+  showActions = true,
 }: {
   reviews: FeedReview[];
   petId: string;
+  showActions?: boolean;
 }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {reviews.map((review) => (
-        <div key={review.id} className="p-3 rounded-lg border bg-card flex items-start gap-3">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-medium text-sm">{review.foodName}</span>
-              {review.brand && (
-                <span className="text-xs text-muted-foreground">{review.brand}</span>
+        <div key={review.id} className="p-4 rounded-lg border bg-card">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-semibold text-sm">{review.foodName}</span>
+                {review.brand && (
+                  <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                    {review.brand}
+                  </span>
+                )}
+              </div>
+              <div className="mt-1">
+                <StarRating rating={review.rating} />
+              </div>
+              {review.review && (
+                <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">
+                  {review.review}
+                </p>
               )}
-              <StarRating rating={review.rating} />
+              <p className="text-xs text-muted-foreground mt-2">
+                {format(new Date(review.createdAt), "yyyy/MM/dd")}
+              </p>
             </div>
-            {review.review && (
-              <p className="text-sm text-muted-foreground mt-0.5">{review.review}</p>
+            {showActions && (
+              <div className="flex items-center gap-1 shrink-0">
+                <Link
+                  href={`/pets/${petId}/feeding/reviews/${review.id}/edit`}
+                  className="inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                  aria-label="編輯"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Link>
+                <DeleteButton
+                  onDelete={async () => {
+                    await deleteFeedReview(review.id, petId);
+                  }}
+                />
+              </div>
             )}
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {format(new Date(review.createdAt), "yyyy/MM/dd")}
-            </p>
           </div>
-          <DeleteButton
-            onDelete={async () => {
-              await deleteFeedReview(review.id, petId);
-            }}
-          />
         </div>
       ))}
     </div>

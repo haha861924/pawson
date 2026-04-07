@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PawPrint, LayoutDashboard, DollarSign, LogOut } from "lucide-react";
+import { PawPrint, LayoutDashboard, DollarSign, MessageSquare, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logoutUser } from "@/lib/actions/auth";
 
@@ -10,6 +10,7 @@ const navItems = [
   { href: "/", label: "儀表板", icon: LayoutDashboard },
   { href: "/pets", label: "寵物管理", icon: PawPrint },
   { href: "/expenses", label: "花費統計", icon: DollarSign },
+  { href: "/community", label: "共同討論區", icon: MessageSquare },
 ];
 
 export function Sidebar({ userName }: { userName?: string | null }) {

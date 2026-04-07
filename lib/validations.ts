@@ -87,6 +87,17 @@ export const weightRecordSchema = z.object({
   notes: z.string().optional(),
 });
 
+export const discussionSchema = z.object({
+  title: z.string().min(1, "請輸入標題"),
+  content: z.string().min(1, "請輸入內容"),
+  category: z.string().min(1, "請選擇分類"),
+  imageUrl: z.string().optional(),
+});
+
+export const discussionCommentSchema = z.object({
+  content: z.string().min(1, "請輸入評論內容"),
+});
+
 export const dailyHealthLogSchema = z.object({
   date: z.string().min(1, "請選擇日期"),
   weight: z.coerce.number().positive("體重必須大於 0").optional().or(z.literal("")),

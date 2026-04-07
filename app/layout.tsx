@@ -28,8 +28,11 @@ export default async function RootLayout({
       <GoogleAnalytics />
       <body className="min-h-screen flex bg-background" suppressHydrationWarning>
         {session?.user && <Sidebar userName={session.user.name} />}
-        <main className="flex-1 overflow-auto pb-20 md:pb-0">
-          <div className="max-w-4xl mx-auto p-4 md:p-6">{children}</div>
+        <main className="flex-1 flex flex-col overflow-auto pb-20 md:pb-0">
+          <div className="max-w-4xl mx-auto p-4 md:p-6 flex-1 w-full">{children}</div>
+          <footer className="border-t border-border/40 py-4 text-center text-xs text-muted-foreground">
+            意見反饋：<a href="mailto:elvina861924@gmail.com" className="underline hover:text-foreground">elvina861924@gmail.com</a>
+          </footer>
         </main>
         {session?.user && <MobileNav userName={session.user.name} />}
         <Toaster />

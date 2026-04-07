@@ -17,13 +17,18 @@ npx prisma studio                      # Open database browser GUI
 
 ## Architecture
 
-**Stack:** Next.js 16 App Router, TypeScript, Tailwind CSS, shadcn/ui (base-ui variant), Prisma 7 + SQLite (via `@prisma/adapter-better-sqlite3`)
+**Stack:** Next.js 16 App Router, TypeScript, Tailwind CSS 4, shadcn/ui (base-ui variant), Prisma 7 + PostgreSQL (Supabase)
 
-**Database:** SQLite file at `./dev.db` (root of project). Prisma config is in `prisma.config.ts` at root. Schema at `prisma/schema.prisma`.
+**Database:** PostgreSQL with `@prisma/adapter-pg`. Prisma config uses `DIRECT_URL` for migrations and `DATABASE_URL` for the app. Schema at `prisma/schema.prisma`.
 
-**Prisma client** (`lib/prisma.ts`) uses `PrismaBetterSqlite3` adapter with a direct path to `./dev.db`. After any schema change, run `prisma migrate dev` then `prisma generate`.
+**Prisma client** (`lib/prisma.ts`) uses `PrismaPg` adapter. After any schema change, run `prisma migrate dev` then `prisma generate`.
 
-**`buttonVariants`:** shadcn's `Button` is a client component. For server components and layouts, import `buttonVariants` from `@/lib/button-variants` (not from `@/components/ui/button`). Client form components import `Button` from `@/components/ui/button` and `buttonVariants` from `@/lib/button-variants`.
+**RWD Guidelines:**
+- **Mobile First**: Use `MobileNav` for screen widths `< md`. The sidebar is hidden on mobile.
+- **Sidebar**: Displayed on `md` and above (`hidden md:flex`).
+- **Padding**: Use `p-4` on mobile and `p-6` on desktop in layout containers.
+
+**`buttonVariants`:** shadcn's `Button` is a client component. For server components and layouts, import `buttonVariants` from `@/lib/button-variants`. Client form components import `Button` from `@/components/ui/button`.
 
 **Server Actions** follow a `(prev: unknown, formData: FormData)` signature — required by React 19's `useActionState`. Actions that need a `dogId` closure wrap the real action in page files (e.g. `async function action(_prev, fd) { "use server"; return createCareRecord(dogId, _prev, fd); }`).
 

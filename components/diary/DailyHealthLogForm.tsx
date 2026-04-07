@@ -1,10 +1,12 @@
 "use client";
 
 import { useActionState } from "react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/lib/button-variants";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -13,28 +15,35 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { APPETITE_OPTIONS, STOOL_OPTIONS, MOOD_OPTIONS } from "@/lib/types";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
-type DailyHealthLogFormProps = {
-  action: (_prev: unknown, formData: FormData) => Promise<{ error?: Record<string, string[]> } | void>;
-  initialDate?: string;
-};
+type ActionResult = { error?: Record<string, string[]> } | void;
 
-export function DailyHealthLogForm({ action, initialDate }: DailyHealthLogFormProps) {
+interface DailyHealthLogFormProps {
+  action: (prev: unknown, formData: FormData) => Promise<ActionResult>;
+  cancelHref: string;
+}
+
+export function DailyHealthLogForm({ action, cancelHref }: DailyHealthLogFormProps) {
   const [state, formAction, pending] = useActionState(action, undefined);
-
-  const today = initialDate || new Date().toISOString().slice(0, 10);
+  const errors = (state as { error?: Record<string, string[]> })?.error ?? {};
 
   return (
-    <form action={formAction} className="space-y-6">
-      {/* Date */}
-      <div>
+    <form action={formAction} className="space-y-4 max-w-lg">
+      <div className="space-y-1">
         <Label htmlFor="date">日期 *</Label>
-        <Input id="date" name="date" type="date" required defaultValue={today} />
-        {state?.error?.date && <p className="text-sm text-red-600 mt-1">{state.error.date[0]}</p>}
+        <Input
+          id="date"
+          name="date"
+          type="date"
+          defaultValue={format(new Date(), "yyyy-MM-dd")}
+          required
+        />
+        {errors.date && <p className="text-destructive text-xs">{errors.date[0]}</p>}
       </div>
 
-      {/* Weight */}
-      <div>
+      <div className="space-y-1">
         <Label htmlFor="weight">體重 (kg)</Label>
         <Input
           id="weight"
@@ -42,81 +51,80 @@ export function DailyHealthLogForm({ action, initialDate }: DailyHealthLogFormPr
           type="number"
           step="0.1"
           min="0"
-          placeholder="輸入體重"
+          placeholder="例如：25.5"
         />
-        {state?.error?.weight && <p className="text-sm text-red-600 mt-1">{state.error.weight[0]}</p>}
+        {errors.weight && <p className="text-destructive text-xs">{errors.weight[0]}</p>}
       </div>
 
-      {/* Appetite */}
-      <div>
-        <Label htmlFor="appetite">飲食</Label>
-        <Select name="appetite">
-          <SelectTrigger>
-            <SelectValue placeholder="選擇飲食狀況" />
+      <div className="space-y-1">
+        <Label htmlFor="appetite">食慾</Label>
+        <Select
+          name="appetite"
+          items={Object.fromEntries(APPETITE_OPTIONS.map((o) => [o.value, o.label]))}
+        >
+          <SelectTrigger id="appetite">
+            <SelectValue placeholder="選擇食慾狀況" />
           </SelectTrigger>
           <SelectContent>
-            {APPETITE_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
+            {APPETITE_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        {state?.error?.appetite && <p className="text-sm text-red-600 mt-1">{state.error.appetite[0]}</p>}
       </div>
 
-      {/* Stool Condition */}
-      <div>
+      <div className="space-y-1">
         <Label htmlFor="stoolCondition">排便</Label>
-        <Select name="stoolCondition">
-          <SelectTrigger>
+        <Select
+          name="stoolCondition"
+          items={Object.fromEntries(STOOL_OPTIONS.map((o) => [o.value, o.label]))}
+        >
+          <SelectTrigger id="stoolCondition">
             <SelectValue placeholder="選擇排便狀況" />
           </SelectTrigger>
           <SelectContent>
-            {STOOL_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
+            {STOOL_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        {state?.error?.stoolCondition && <p className="text-sm text-red-600 mt-1">{state.error.stoolCondition[0]}</p>}
       </div>
 
-      {/* Mood */}
-      <div>
+      <div className="space-y-1">
         <Label htmlFor="mood">精神</Label>
-        <Select name="mood">
-          <SelectTrigger>
-            <SelectValue placeholder="選擇精神狀況" />
+        <Select
+          name="mood"
+          items={Object.fromEntries(MOOD_OPTIONS.map((o) => [o.value, o.label]))}
+        >
+          <SelectTrigger id="mood">
+            <SelectValue placeholder="選擇精神狀態" />
           </SelectTrigger>
           <SelectContent>
-            {MOOD_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
+            {MOOD_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        {state?.error?.mood && <p className="text-sm text-red-600 mt-1">{state.error.mood[0]}</p>}
       </div>
 
-      {/* Has Vomiting */}
       <div className="flex items-center gap-2">
         <input
           id="hasVomiting"
           name="hasVomiting"
           type="checkbox"
-          className="h-4 w-4"
           value="true"
+          className="h-4 w-4"
         />
-        <Label htmlFor="hasVomiting" className="cursor-pointer">
-          有嘔吐症狀
-        </Label>
+        <Label htmlFor="hasVomiting">有嘔吐情形</Label>
       </div>
 
-      {/* Temperature */}
-      <div>
+      <div className="space-y-1">
         <Label htmlFor="temperature">體溫 (°C)</Label>
         <Input
           id="temperature"
@@ -125,23 +133,26 @@ export function DailyHealthLogForm({ action, initialDate }: DailyHealthLogFormPr
           step="0.1"
           min="35"
           max="45"
-          placeholder="輸入體溫"
+          placeholder="例如：38.5"
         />
-        {state?.error?.temperature && (
-          <p className="text-sm text-red-600 mt-1">{state.error.temperature[0]}</p>
+        {errors.temperature && (
+          <p className="text-destructive text-xs">{errors.temperature[0]}</p>
         )}
       </div>
 
-      {/* Notes */}
-      <div>
-        <Label htmlFor="notes">其他症狀或備註</Label>
-        <Textarea id="notes" name="notes" rows={4} placeholder="記錄其他觀察到的症狀或特殊狀況" />
-        {state?.error?.notes && <p className="text-sm text-red-600 mt-1">{state.error.notes[0]}</p>}
+      <div className="space-y-1">
+        <Label htmlFor="notes">備註</Label>
+        <Textarea id="notes" name="notes" rows={3} placeholder="記錄任何相關觀察..." />
       </div>
 
-      <Button type="submit" disabled={pending}>
-        {pending ? "儲存中..." : "儲存"}
-      </Button>
+      <div className="flex gap-3 pt-2">
+        <Button type="submit" disabled={pending}>
+          {pending ? "儲存中..." : "儲存"}
+        </Button>
+        <Link href={cancelHref} className={cn(buttonVariants({ variant: "outline" }))}>
+          取消
+        </Link>
+      </div>
     </form>
   );
 }

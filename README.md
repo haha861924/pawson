@@ -128,6 +128,7 @@ async function action(_prev: unknown, fd: FormData) {
 /pets/[petId]/feeding      飼料管理 + 飼料評論
 /pets/[petId]/health       健康照護 + 用藥提醒
 /pets/[petId]/weight       成長曲線（體重追蹤 + 圖表）
+/pets/[petId]/diary        成長日誌（日曆視圖 + 體重趨勢圖 + 每日健康記錄）
 /pets/[petId]/expenses     單一寵物花費
 /pets/[petId]/members      成員管理（飼主限定）
 /expenses                  全部花費統計（含篩選與圖表）
@@ -175,12 +176,34 @@ async function action(_prev: unknown, fd: FormData) {
 
 全域花費頁 `/expenses` 支援依寵物、品種、類別篩選。
 
+### 成長日誌
+
+每日健康記錄頁 `/pets/[petId]/diary`，整合三個視圖：
+
+- **日曆視圖**：高亮有記錄的日期，點選後顯示當日體重、食慾、排便、精神、嘔吐與體溫摘要。
+- **體重趨勢圖**：有兩筆以上體重記錄時顯示，使用 Recharts 折線圖。
+- **最近紀錄列表**：逐條顯示所有每日健康記錄，支援刪除。
+
+資料模型：`DailyHealthLog`（含 `weight`、`appetite`、`stoolCondition`、`mood`、`hasVomiting`、`temperature`、`notes`）。每隻寵物每日限一筆（`@@unique([petId, date])`）。
+
+### 回應式設計（RWD）
+
+採用 **Mobile-first** 策略，支援多種掌上型與桌面裝置：
+
+| 斷點 | 導覽模式 | 頁面間距 |
+| --------- | ------- | --------- |
+| `< md` (手機) | 底部 `MobileNav` Tab Bar | `p-4` |
+| `≥ md` (桌機) | 左側 `Sidebar` 側欄 | `p-6` |
+
+- **Sidebar**：於手機隱藏 (`hidden md:flex`)，由底部固定導覽列取代。
+- **寵物詳情**：Tab 導覽支援水平捲動 (`overflow-x-auto`) 以適配小螢幕。
+
 ### 測試
 
 **測試狀態：**
 
-- ✅ 單元測試：70/70 通過（覆蓋 validations、actions、components）
-- ✅ E2E 測試：30 個測試（7 個測試檔案）
+- ✅ 單元測試：通過（覆蓋 validations、actions、components）
+- ✅ E2E 測試（7 個測試檔案）
 - ✅ Build：正式建置通過
 
 ```bash
@@ -226,6 +249,7 @@ E2E_EMAIL=your@email.com E2E_PASSWORD=YourPassword npx playwright test
 - ✅ 飼料管理（計畫、記錄、評論）
 - ✅ 健康照護（用藥提醒）
 - ✅ 成長曲線（體重追蹤）
+- ✅ 成長日誌（每日健康記錄 + 日曆視圖）
 - ✅ 花費記錄與統計
 - ✅ 單元測試（驗證、型別、元件）
 
@@ -243,6 +267,7 @@ E2E_EMAIL=your@email.com E2E_PASSWORD=YourPassword npx playwright test
 | 飼料評論（星等+文字）               | `/pets/[petId]/feeding`  |
 | 健康照護 + 用藥提醒                 | `/pets/[petId]/health`   |
 | 成長曲線（體重追蹤 + 圖表）         | `/pets/[petId]/weight`   |
+| 成長日誌（日曆視圖 + 每日健康記錄） | `/pets/[petId]/diary`    |
 | 花費記錄 + 統一發票                 | `/pets/[petId]/expenses` |
 | 全部花費統計 + 圖表                 | `/expenses`              |
 | Google Analytics 流量分析            | 自動整合（GA4）          |

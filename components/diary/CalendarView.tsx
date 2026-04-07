@@ -1,21 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import {
-  format,
-  startOfMonth,
-  endOfMonth,
-  eachDayOfInterval,
-  isSameDay,
-  addMonths,
-  subMonths,
-} from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { format, isSameDay } from "date-fns";
 import { zhTW } from "date-fns/locale";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import {
+  APPETITE_OPTIONS,
+  STOOL_OPTIONS,
+  MOOD_OPTIONS,
+  getLabel,
+} from "@/lib/types";
 
-type DailyLog = {
+interface DailyHealthLog {
   id: string;
   date: Date;
   weight: number | null;
@@ -24,117 +21,92 @@ type DailyLog = {
   mood: string | null;
   hasVomiting: boolean;
   temperature: number | null;
-};
+  notes: string | null;
+}
 
-type CalendarViewProps = {
-  logs: DailyLog[];
-};
+interface CalendarViewProps {
+  logs: DailyHealthLog[];
+}
 
 export function CalendarView({ logs }: CalendarViewProps) {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
-  const monthStart = startOfMonth(currentMonth);
-  const monthEnd = endOfMonth(currentMonth);
-  const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
+  const logDates = logs.map((l) => new Date(l.date));
 
-  // Get first day of month (0 = Sunday, 6 = Saturday)
-  const firstDayOfWeek = monthStart.getDay();
-
-  const logsByDate = new Map(
-    logs.map((log) => [format(log.date, "yyyy-MM-dd"), log])
-  );
-
-  const getEmojiIndicators = (log: DailyLog | undefined) => {
-    if (!log) return null;
-    return (
-      <div className="flex flex-wrap gap-0.5 text-xs mt-1 justify-center">
-        {log.weight && <div title="體重">📊 {log.weight}kg</div>}
-        {log.appetite && <div title={log.appetite}>🍽️</div>}
-        {log.stoolCondition && <div title={log.stoolCondition}>💩</div>}
-        {log.hasVomiting && <div title="嘔吐">🤮</div>}
-        {log.mood && <div title={log.mood}>😊</div>}
-        {log.temperature && (
-          <div title={`體溫 ${log.temperature}°C`} className="text-red-600 dark:text-red-400">
-            🌡️ {log.temperature}°C
-          </div>
-        )}
-      </div>
-    );
-  };
+  const selectedLog = selectedDate
+    ? logs.find((l) => isSameDay(new Date(l.date), selectedDate))
+    : undefined;
 
   return (
-    <div className="border rounded-lg p-4">
-      {/* Month navigation */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold">
-          {format(currentMonth, "yyyy年 M月", { locale: zhTW })}
-        </h2>
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setCurrentMonth(new Date())}
-          >
-            今天
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Calendar grid */}
-      <div className="grid grid-cols-7 gap-2">
-        {/* Weekday headers */}
-        {["日", "一", "二", "三", "四", "五", "六"].map((day) => (
-          <div key={day} className="text-center text-sm font-medium text-muted-foreground py-2">
-            {day}
-          </div>
-        ))}
-
-        {/* Empty cells for days before month start */}
-        {Array.from({ length: firstDayOfWeek }).map((_, i) => (
-          <div key={`empty-${i}`} />
-        ))}
-
-        {/* Days of month */}
-        {daysInMonth.map((day) => {
-          const dateKey = format(day, "yyyy-MM-dd");
-          const log = logsByDate.get(dateKey);
-          const isToday = isSameDay(day, new Date());
-
-          return (
-            <Button
-              key={dateKey}
-              variant="ghost"
-              className={cn(
-                "h-auto min-h-[80px] flex-col items-start p-2 relative",
-                isToday && "bg-blue-50 dark:bg-blue-950",
-                log && "bg-green-50 dark:bg-green-950"
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">日曆視圖</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col md:flex-row gap-4">
+        <Calendar
+          mode="single"
+          selected={selectedDate}
+          onSelect={setSelectedDate}
+          locale={zhTW}
+          modifiers={{ hasLog: logDates }}
+          modifiersClassNames={{ hasLog: "bg-primary/20 font-semibold rounded-full" }}
+        />
+        <div className="flex-1 min-w-0">
+          {selectedDate && (
+            <p className="text-sm font-medium mb-2">
+              {format(selectedDate, "yyyy/MM/dd (E)", { locale: zhTW })}
+            </p>
+          )}
+          {selectedLog ? (
+            <div className="space-y-1 text-sm">
+              {selectedLog.weight != null && (
+                <div className="flex gap-2">
+                  <span className="text-muted-foreground w-16 shrink-0">體重</span>
+                  <span>{selectedLog.weight} kg</span>
+                </div>
               )}
-            >
-              <div className="font-medium">{format(day, "d")}</div>
-              {getEmojiIndicators(log)}
-            </Button>
-          );
-        })}
-      </div>
-
-      {/* Legend */}
-      <div className="mt-4 text-xs text-muted-foreground text-center">
-        📊 體重 | 🍽️ 飲食 | 💩 排便 | 🤮 嘔吐 | 😊 精神 | 🌡️ 體溫
-      </div>
-    </div>
+              {selectedLog.appetite && (
+                <div className="flex gap-2">
+                  <span className="text-muted-foreground w-16 shrink-0">食慾</span>
+                  <span>{getLabel(APPETITE_OPTIONS, selectedLog.appetite)}</span>
+                </div>
+              )}
+              {selectedLog.stoolCondition && (
+                <div className="flex gap-2">
+                  <span className="text-muted-foreground w-16 shrink-0">排便</span>
+                  <span>{getLabel(STOOL_OPTIONS, selectedLog.stoolCondition)}</span>
+                </div>
+              )}
+              {selectedLog.mood && (
+                <div className="flex gap-2">
+                  <span className="text-muted-foreground w-16 shrink-0">精神</span>
+                  <span>{getLabel(MOOD_OPTIONS, selectedLog.mood)}</span>
+                </div>
+              )}
+              <div className="flex gap-2">
+                <span className="text-muted-foreground w-16 shrink-0">嘔吐</span>
+                <span>{selectedLog.hasVomiting ? "有" : "無"}</span>
+              </div>
+              {selectedLog.temperature != null && (
+                <div className="flex gap-2">
+                  <span className="text-muted-foreground w-16 shrink-0">體溫</span>
+                  <span>{selectedLog.temperature} °C</span>
+                </div>
+              )}
+              {selectedLog.notes && (
+                <div className="flex gap-2">
+                  <span className="text-muted-foreground w-16 shrink-0">備註</span>
+                  <span>{selectedLog.notes}</span>
+                </div>
+              )}
+            </div>
+          ) : selectedDate ? (
+            <p className="text-sm text-muted-foreground">此日無記錄</p>
+          ) : (
+            <p className="text-sm text-muted-foreground">點選日期查看當日摘要</p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

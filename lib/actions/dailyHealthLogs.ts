@@ -13,13 +13,6 @@ export async function getDailyHealthLogs(petId: string) {
   });
 }
 
-export async function getWeightRecords(petId: string) {
-  return prisma.weightRecord.findMany({
-    where: { petId },
-    orderBy: { date: "asc" },
-  });
-}
-
 export async function createDailyHealthLog(
   petId: string,
   _prev: unknown,
